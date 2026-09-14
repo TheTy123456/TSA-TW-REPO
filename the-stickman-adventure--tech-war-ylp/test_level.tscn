@@ -33,7 +33,7 @@ tile_map_data = PackedByteArray("AAAAAP//AAACAAEAAAAAAAAAAAACAAEAAAAAAAEAAAACAAE
 tile_set = SubResource("TileSet_rrtyo")
 
 [node name="Stick" parent="." unique_id=342837933 instance=ExtResource("2_1c2mv")]
-position = Vector2(42, -2913)
+position = Vector2(68, -43)
 respawn_position = Vector2(50, -100)
 
 [node name="Camera2D" type="Camera2D" parent="." unique_id=7559479 node_paths=PackedStringArray("player")]
