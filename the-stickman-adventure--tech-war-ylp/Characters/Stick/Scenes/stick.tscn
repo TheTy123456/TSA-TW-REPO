@@ -1,7 +1,7 @@
 [gd_scene format=3 uid="uid://cs6bpxm5lxm5x"]
 
-[ext_resource type="Script" uid="uid://d1dmqvggw0k6n" path="res://stick.gd" id="1_1hssm"]
-[ext_resource type="Texture2D" uid="uid://cvicguac23r2n" path="res://pixilart-sprite.png" id="2_0algd"]
+[ext_resource type="Script" uid="uid://d1dmqvggw0k6n" path="res://Characters/Stick/Scripts/stick.gd" id="1_1hssm"]
+[ext_resource type="Texture2D" uid="uid://cvicguac23r2n" path="res://Characters/Stick/Sprites/pixilart-sprite.png" id="2_0algd"]
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_1hssm"]
 atlas = ExtResource("2_0algd")

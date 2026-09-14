@@ -1,7 +1,7 @@
 [gd_scene format=3 uid="uid://d1aqq35qid7gv"]
 
-[ext_resource type="Shader" uid="uid://b4korp7pf7tyx" path="res://fade_transition.gdshader" id="2_6msao"]
-[ext_resource type="Script" uid="uid://bo5jnll2mxvtf" path="res://circle_transition.gd" id="2_yqpmr"]
+[ext_resource type="Shader" uid="uid://b4korp7pf7tyx" path="res://UI Mechanics/Transitions/Shaders/fade_transition.gdshader" id="2_6msao"]
+[ext_resource type="Script" uid="uid://bo5jnll2mxvtf" path="res://UI Mechanics/Transitions/Scripts/circle_transition.gd" id="2_yqpmr"]
 
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_yqpmr"]
 shader = ExtResource("2_6msao")

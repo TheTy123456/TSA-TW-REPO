@@ -10,6 +10,7 @@ extends CharacterBody2D
 @export var gravity := 900.0
 
 @export var respawn_position := Vector2.ZERO
+
 enum State {
 	Idle,
 	Walk,
@@ -29,7 +30,7 @@ var was_on_floor := false
 var landing := false
 func _physics_process(delta):
 	var prev_velocity_x = velocity.x
-	input_dir = Input.get_action_strength("ui_right") - Input.get_action_strength("ui_left")
+	input_dir = Input.get_action_strength("move_right") - Input.get_action_strength("move_left")
 	
 	if landing:
 		move_and_slide()
@@ -64,7 +65,7 @@ func _physics_process(delta):
 		velocity.y += gravity * delta
 		current_state = State.Jump if velocity.y < 0 else State.Fall
 	
-	if is_on_floor() and Input.is_action_just_pressed("ui_accept"):
+	if is_on_floor() and Input.is_action_just_pressed("move_up"):
 		velocity.y = -jump_force
 		current_state = State.Jump
 		

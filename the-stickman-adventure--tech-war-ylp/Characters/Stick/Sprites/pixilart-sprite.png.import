@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://dvt0m47x6bcuv"
-path="res://.godot/imported/White-Circle-PNG-HD-Image.png-fa610468c865d5364a96b3870f433ea4.ctex"
+uid="uid://cvicguac23r2n"
+path="res://.godot/imported/pixilart-sprite.png-a83babb2826c297d8f1541e56a6927fc.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://White-Circle-PNG-HD-Image.png"
-dest_files=["res://.godot/imported/White-Circle-PNG-HD-Image.png-fa610468c865d5364a96b3870f433ea4.ctex"]
+source_file="res://Characters/Stick/Sprites/pixilart-sprite.png"
+dest_files=["res://.godot/imported/pixilart-sprite.png-a83babb2826c297d8f1541e56a6927fc.ctex"]
 
 [params]
 
