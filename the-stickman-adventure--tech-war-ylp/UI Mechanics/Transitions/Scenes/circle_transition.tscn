@@ -10,12 +10,17 @@ shader_parameter/fade = 0.0
 [sub_resource type="Shader" id="Shader_coj6g"]
 code = "shader_type canvas_item;
 
-uniform float circle_size : hint_range(0.0, 1.0) = 0.5f; // 1.0 = full circle, 0.0 = invisible
+uniform float circle_size : hint_range(0.0, 1.0) = 1.0f; // 1.0 = full circle, 0.0 = invisible
 
 void fragment() {
-	if (distance(vec2(0.5,0.5), UV) < circle_size){
-	COLOR.a *= 0.0;
-	}
+	vec2 center = vec2(0.5,0.5);
+	float d = distance(SCREEN_UV, center);
+	
+	if (d < circle_size){
+		COLOR = vec4(0.0, 0.0, 0.0, 0.0);
+	} else {
+		COLOR = vec4(0.0, 0.0, 0.0, 1.0);
+		}
 }"
 
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_rrtyo"]
@@ -47,6 +52,22 @@ tracks/1/keys = {
 "transitions": PackedFloat32Array(1),
 "update": 0,
 "values": [0.0]
+}
+
+[sub_resource type="Animation" id="Animation_nqdvh"]
+resource_name = "circle_fade_in"
+length = 0.6
+tracks/0/type = "value"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath(".:material:shader_parameter/circle_size")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/keys = {
+"times": PackedFloat32Array(0, 0.6),
+"transitions": PackedFloat32Array(1, 1),
+"update": 0,
+"values": [1.0, 0.0]
 }
 
 [sub_resource type="Animation" id="Animation_6kyp0"]
@@ -81,11 +102,29 @@ tracks/0/keys = {
 "values": [0.0, 1.0]
 }
 
+[sub_resource type="Animation" id="Animation_mihnj"]
+resource_name = "fade_out"
+length = 0.6
+tracks/0/type = "value"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath("../FadeTrans:material:shader_parameter/fade")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/keys = {
+"times": PackedFloat32Array(0, 0.6),
+"transitions": PackedFloat32Array(1, 1),
+"update": 0,
+"values": [1.0, 0.0]
+}
+
 [sub_resource type="AnimationLibrary" id="AnimationLibrary_yqpmr"]
 _data = {
 &"RESET": SubResource("Animation_yqpmr"),
+&"circle_fade_in": SubResource("Animation_nqdvh"),
 &"circle_fade_out": SubResource("Animation_6kyp0"),
-&"fade_in": SubResource("Animation_2k5cr")
+&"fade_in": SubResource("Animation_2k5cr"),
+&"fade_out": SubResource("Animation_mihnj")
 }
 
 [node name="Transitions" type="CanvasLayer" unique_id=1135095852]
@@ -99,8 +138,17 @@ color = Color(0, 0, 0, 1)
 
 [node name="CircleTrans" type="ColorRect" parent="." unique_id=2036349607]
 material = SubResource("ShaderMaterial_rrtyo")
-offset_right = 1932.0
-offset_bottom = 1083.0
+anchors_preset = 3
+anchor_left = 1.0
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = -39006.0
+offset_top = -31844.0
+offset_right = 13117.0
+offset_bottom = 3415.0
+grow_horizontal = 0
+grow_vertical = 0
 color = Color(0, 0, 0, 1)
 
 [node name="AnimationPlayer" type="AnimationPlayer" parent="." unique_id=1505348164]

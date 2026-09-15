@@ -6,13 +6,18 @@ extends Camera2D
 @export var fall_vertical_smoothing = 30.0
 @export var fall_delay = 0.0
 @export var lookahead_distance = 40.0
-
+@export var follow_speed := 8.0
 var fall_timer = 0.0
 var look_dir = 0.0
 
 func _process(delta):
 	if player == null:
 		return
+	
+	if not player.camera_should_follow:
+		return
+	
+	
 	var target_pos = player.global_position
 	
 	if not player.is_on_floor():

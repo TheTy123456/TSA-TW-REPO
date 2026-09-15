@@ -34,6 +34,13 @@ tile_set = SubResource("TileSet_rrtyo")
 
 [node name="Stick" parent="." unique_id=342837933 instance=ExtResource("3_3qix0")]
 position = Vector2(68, -43)
+move_speed = null
+acceleration = null
+deceleration = null
+turn_slowdown = null
+turn_blend = null
+jump_force = null
+gravity = null
 respawn_position = Vector2(50, -100)
 
 [node name="Camera2D" type="Camera2D" parent="." unique_id=7559479 node_paths=PackedStringArray("player")]
@@ -53,6 +60,6 @@ fall_vertical_smoothing = 60.0
 position = Vector2(837.5, 698.5)
 shape = SubResource("RectangleShape2D_rrtyo")
 
-[node name="CircleTransition" parent="." unique_id=938060551 instance=ExtResource("5_kmo6j")]
+[node name="Transitions" parent="." unique_id=938060551 instance=ExtResource("5_kmo6j")]
 
 [connection signal="body_entered" from="FallDeathArea" to="Stick" method="_on_fall_death_area_body_entered"]
