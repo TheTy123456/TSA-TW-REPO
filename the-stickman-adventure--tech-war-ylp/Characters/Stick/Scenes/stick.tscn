@@ -215,7 +215,6 @@ height = 42.0
 [node name="Stick" type="CharacterBody2D" unique_id=342837933]
 script = ExtResource("1_1hssm")
 enable_variable_jump = false
-auto_jump = false
 respawn_position = Vector2(50, -150)
 
 [node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="." unique_id=129367735]
