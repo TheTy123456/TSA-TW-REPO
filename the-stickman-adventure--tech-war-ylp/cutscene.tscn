@@ -1,0 +1,54 @@
+[gd_scene format=3 uid="uid://c3t7noa78nndq"]
+
+[ext_resource type="Texture2D" uid="uid://d1ckha3ce4ykg" path="res://pixil-frame-0.png" id="1_8vcau"]
+[ext_resource type="Texture2D" uid="uid://c6f3g5e8y8tf" path="res://pixil-frame-1.png" id="2_bl24s"]
+[ext_resource type="Texture2D" uid="uid://bueu8fxkbihyu" path="res://pixil-frame-2.png" id="3_u4yv4"]
+
+[sub_resource type="Animation" id="Animation_p30sb"]
+length = 0.001
+tracks/0/type = "value"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath("Sprite2D:texture")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/keys = {
+"times": PackedFloat32Array(0),
+"transitions": PackedFloat32Array(1),
+"update": 1,
+"values": [ExtResource("1_8vcau")]
+}
+
+[sub_resource type="Animation" id="Animation_53jq0"]
+resource_name = "dancing"
+length = 0.3
+loop_mode = 1
+tracks/0/type = "value"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath("Sprite2D:texture")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/keys = {
+"times": PackedFloat32Array(0, 0.1, 0.2),
+"transitions": PackedFloat32Array(1.189201, 1.189201, 1.189201),
+"update": 1,
+"values": [ExtResource("1_8vcau"), ExtResource("2_bl24s"), ExtResource("3_u4yv4")]
+}
+
+[sub_resource type="AnimationLibrary" id="AnimationLibrary_3q24f"]
+_data = {
+&"RESET": SubResource("Animation_p30sb"),
+&"dancing": SubResource("Animation_53jq0")
+}
+
+[node name="Node2D" type="Node2D" unique_id=1047156857]
+
+[node name="Camera2D" type="Camera2D" parent="." unique_id=2099217315]
+zoom = Vector2(4, 7)
+
+[node name="Sprite2D" type="Sprite2D" parent="." unique_id=1309596676]
+texture = ExtResource("1_8vcau")
+
+[node name="AnimationPlayer" type="AnimationPlayer" parent="." unique_id=820959939]
+libraries/ = SubResource("AnimationLibrary_3q24f")

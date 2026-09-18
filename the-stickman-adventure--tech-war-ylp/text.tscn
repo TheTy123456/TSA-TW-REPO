@@ -1,0 +1,10 @@
+[gd_scene format=3 uid="uid://cws1ithn2s6tq"]
+
+[node name="CanvasLayer" type="CanvasLayer" unique_id=1816361871]
+
+[node name="Label" type="Label" parent="." unique_id=1303917474]
+offset_right = 40.0
+offset_bottom = 23.0
+theme_override_font_sizes/font_size = 45
+text = "To move: A and D, left and right arrows
+To jump: press W or up arrow"

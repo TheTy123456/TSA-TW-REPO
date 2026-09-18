@@ -2,6 +2,8 @@
 
 [ext_resource type="Script" uid="uid://d1dmqvggw0k6n" path="res://Characters/Stick/Scripts/stick.gd" id="1_1hssm"]
 [ext_resource type="Texture2D" uid="uid://cvicguac23r2n" path="res://Characters/Stick/Sprites/pixilart-sprite.png" id="2_0algd"]
+[ext_resource type="Shape2D" uid="uid://d168j72ka1a35" path="res://Characters/Stick/Hitboxes/stick_normal.tres" id="3_5d5lj"]
+[ext_resource type="Texture2D" uid="uid://c7en7bqic4okl" path="res://Characters/Stick/pixil-frame-0 (2).png" id="4_m0jdc"]
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_1hssm"]
 atlas = ExtResource("2_0algd")
@@ -62,6 +64,14 @@ region = Rect2(816, 0, 48, 48)
 [sub_resource type="AtlasTexture" id="AtlasTexture_5w5ll"]
 atlas = ExtResource("2_0algd")
 region = Rect2(864, 0, 48, 48)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_pgj23"]
+atlas = ExtResource("2_0algd")
+region = Rect2(1104, 0, 48, 48)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_5d5lj"]
+atlas = ExtResource("2_0algd")
+region = Rect2(1152, 0, 48, 48)
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_mdf2q"]
 atlas = ExtResource("2_0algd")
@@ -176,6 +186,17 @@ animations = [{
 }, {
 "frames": [{
 "duration": 1.0,
+"texture": SubResource("AtlasTexture_pgj23")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_5d5lj")
+}],
+"loop": 1,
+"name": &"run",
+"speed": 12.0
+}, {
+"frames": [{
+"duration": 1.0,
 "texture": SubResource("AtlasTexture_mdf2q")
 }],
 "loop": 0,
@@ -208,24 +229,53 @@ animations = [{
 "speed": 12.0
 }]
 
-[sub_resource type="CapsuleShape2D" id="CapsuleShape2D_rrtyo"]
-radius = 7.0
-height = 42.0
+[sub_resource type="Gradient" id="Gradient_qrqt6"]
+colors = PackedColorArray(1, 1, 1, 1, 1, 1, 1, 0)
+
+[sub_resource type="GradientTexture1D" id="GradientTexture1D_pxycb"]
+gradient = SubResource("Gradient_qrqt6")
+
+[sub_resource type="Curve" id="Curve_fck5u"]
+_data = [Vector2(0, 0), 0.0, 0.0, 0, 0, Vector2(0.5495496, 0.75000006), 0.0, 0.0, 0, 0, Vector2(1, 0), 0.0, 0.0, 0, 0]
+point_count = 3
+
+[sub_resource type="CurveTexture" id="CurveTexture_8v6j0"]
+curve = SubResource("Curve_fck5u")
+
+[sub_resource type="ParticleProcessMaterial" id="ParticleProcessMaterial_rrtyo"]
+lifetime_randomness = 0.21
+particle_flag_disable_z = true
+emission_shape = 3
+emission_box_extents = Vector3(1, 1, 1)
+direction = Vector3(-0.3, -0.2, -0.5)
+initial_velocity_min = 20.0
+initial_velocity_max = 40.0
+gravity = Vector3(-80, -38, 0)
+use_scale_3d = true
+scale_3d_min = Vector3(1, 1, 1)
+scale_3d_max = Vector3(1, 1, 1)
+scale_curve = SubResource("CurveTexture_8v6j0")
+color_ramp = SubResource("GradientTexture1D_pxycb")
 
 [node name="Stick" type="CharacterBody2D" unique_id=342837933]
 script = ExtResource("1_1hssm")
-enable_variable_jump = false
 respawn_position = Vector2(50, -150)
 
 [node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="." unique_id=129367735]
 sprite_frames = SubResource("SpriteFrames_j1cus")
-animation = &"land"
+animation = &"idle"
 autoplay = "idle"
-frame = 5
-frame_progress = 1.0
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="." unique_id=821858130]
 position = Vector2(0, 3)
-shape = SubResource("CapsuleShape2D_rrtyo")
+shape = ExtResource("3_5d5lj")
+
+[node name="GPUParticles2D" type="GPUParticles2D" parent="." unique_id=2075558593]
+position = Vector2(0, 23)
+emitting = false
+amount = 20
+texture = ExtResource("4_m0jdc")
+one_shot = true
+process_material = SubResource("ParticleProcessMaterial_rrtyo")
 
 [connection signal="animation_finished" from="AnimatedSprite2D" to="." method="_on_animated_sprite_2d_animation_finished"]
