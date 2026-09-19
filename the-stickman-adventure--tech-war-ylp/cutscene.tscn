@@ -1,10 +1,12 @@
 [gd_scene format=3 uid="uid://c3t7noa78nndq"]
 
 [ext_resource type="Texture2D" uid="uid://d1ckha3ce4ykg" path="res://pixil-frame-0.png" id="1_8vcau"]
+[ext_resource type="Script" uid="uid://cwixwkv061xel" path="res://cutscene.gd" id="1_ix241"]
+[ext_resource type="PackedScene" uid="uid://d1aqq35qid7gv" path="res://UI Mechanics/Transitions/Scenes/circle_transition.tscn" id="1_ye7fo"]
 [ext_resource type="Texture2D" uid="uid://c6f3g5e8y8tf" path="res://pixil-frame-1.png" id="2_bl24s"]
 [ext_resource type="Texture2D" uid="uid://bueu8fxkbihyu" path="res://pixil-frame-2.png" id="3_u4yv4"]
 
-[sub_resource type="Animation" id="Animation_p30sb"]
+[sub_resource type="Animation" id="Animation_u4yv4"]
 length = 0.001
 tracks/0/type = "value"
 tracks/0/imported = false
@@ -19,9 +21,9 @@ tracks/0/keys = {
 "values": [ExtResource("1_8vcau")]
 }
 
-[sub_resource type="Animation" id="Animation_53jq0"]
-resource_name = "dancing"
-length = 0.3
+[sub_resource type="Animation" id="Animation_8vcau"]
+resource_name = "cutscene"
+length = 0.4
 loop_mode = 1
 tracks/0/type = "value"
 tracks/0/imported = false
@@ -30,25 +32,32 @@ tracks/0/path = NodePath("Sprite2D:texture")
 tracks/0/interp = 1
 tracks/0/loop_wrap = true
 tracks/0/keys = {
-"times": PackedFloat32Array(0, 0.1, 0.2),
-"transitions": PackedFloat32Array(1.189201, 1.189201, 1.189201),
+"times": PackedFloat32Array(0.001, 0.13333334, 0.26666668),
+"transitions": PackedFloat32Array(1, 1, 1),
 "update": 1,
 "values": [ExtResource("1_8vcau"), ExtResource("2_bl24s"), ExtResource("3_u4yv4")]
 }
 
-[sub_resource type="AnimationLibrary" id="AnimationLibrary_3q24f"]
+[sub_resource type="AnimationLibrary" id="AnimationLibrary_bl24s"]
 _data = {
-&"RESET": SubResource("Animation_p30sb"),
-&"dancing": SubResource("Animation_53jq0")
+&"RESET": SubResource("Animation_u4yv4"),
+&"cutscene": SubResource("Animation_8vcau")
 }
 
-[node name="Node2D" type="Node2D" unique_id=1047156857]
+[node name="Cutscenes" type="Node2D" unique_id=1047156857]
+script = ExtResource("1_ix241")
+next_level = "uid://y7a762ler2ku"
 
-[node name="Camera2D" type="Camera2D" parent="." unique_id=2099217315]
-zoom = Vector2(4, 7)
+[node name="AnimationPlayer" type="AnimationPlayer" parent="." unique_id=635988268]
+libraries/ = SubResource("AnimationLibrary_bl24s")
 
-[node name="Sprite2D" type="Sprite2D" parent="." unique_id=1309596676]
+[node name="Sprite2D" type="Sprite2D" parent="." unique_id=1412401678]
+position = Vector2(1001.0001, 521)
+scale = Vector2(7.266667, 8.22)
 texture = ExtResource("1_8vcau")
 
-[node name="AnimationPlayer" type="AnimationPlayer" parent="." unique_id=820959939]
-libraries/ = SubResource("AnimationLibrary_3q24f")
+[node name="Transitions" parent="." unique_id=1135095852 instance=ExtResource("1_ye7fo")]
+
+[connection signal="animation_finished" from="AnimationPlayer" to="." method="_on_animation_player_animation_finished"]
+
+[editable path="Transitions"]

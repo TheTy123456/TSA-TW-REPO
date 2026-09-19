@@ -34,7 +34,7 @@ tile_map_data = PackedByteArray("AAAAAP//AAACAAEAAAAAAAAAAAACAAEAAAAAAAEAAAACAAE
 tile_set = SubResource("TileSet_rrtyo")
 
 [node name="Stick" parent="." unique_id=342837933 instance=ExtResource("3_3qix0")]
-position = Vector2(68, -43)
+position = Vector2(69, -40)
 enable_variable_jump = false
 respawn_position = Vector2(50, -100)
 

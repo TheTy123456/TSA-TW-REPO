@@ -1,4 +1,7 @@
 extends Node2D
 
-func _ready():
-	$Transitions/AnimationPlayer.play("circle_fade_out")
+@onready var transitions: CanvasLayer = $Transitions
+
+
+func _ready() -> void:
+	transitions.play_circle_fade_out()

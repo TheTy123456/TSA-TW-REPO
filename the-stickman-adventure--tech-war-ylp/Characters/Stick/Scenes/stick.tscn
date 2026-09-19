@@ -103,7 +103,7 @@ animations = [{
 "duration": 1.0,
 "texture": SubResource("AtlasTexture_1hssm")
 }],
-"loop": 1,
+"loop": 0,
 "name": &"crouch",
 "speed": 5.0
 }, {
@@ -263,7 +263,7 @@ respawn_position = Vector2(50, -150)
 
 [node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="." unique_id=129367735]
 sprite_frames = SubResource("SpriteFrames_j1cus")
-animation = &"idle"
+animation = &"walk"
 autoplay = "idle"
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="." unique_id=821858130]
@@ -271,7 +271,7 @@ position = Vector2(0, 3)
 shape = ExtResource("3_5d5lj")
 
 [node name="GPUParticles2D" type="GPUParticles2D" parent="." unique_id=2075558593]
-position = Vector2(0, 23)
+position = Vector2(-17, 23)
 emitting = false
 amount = 20
 texture = ExtResource("4_m0jdc")
