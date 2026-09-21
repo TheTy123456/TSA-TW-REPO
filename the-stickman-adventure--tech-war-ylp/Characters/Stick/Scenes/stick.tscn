@@ -247,7 +247,7 @@ lifetime_randomness = 0.21
 particle_flag_disable_z = true
 emission_shape = 3
 emission_box_extents = Vector3(1, 1, 1)
-direction = Vector3(-0.3, -0.2, -0.5)
+direction = Vector3(-3, 0, -3)
 initial_velocity_min = 20.0
 initial_velocity_max = 40.0
 gravity = Vector3(-80, -38, 0)
@@ -259,7 +259,7 @@ color_ramp = SubResource("GradientTexture1D_pxycb")
 
 [node name="Stick" type="CharacterBody2D" unique_id=342837933]
 script = ExtResource("1_1hssm")
-respawn_position = Vector2(50, -150)
+auto_jump = true
 
 [node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="." unique_id=129367735]
 sprite_frames = SubResource("SpriteFrames_j1cus")
