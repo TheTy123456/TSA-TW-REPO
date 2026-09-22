@@ -2,7 +2,7 @@ extends CharacterBody2D
 
 @onready var animated_sprite_2d: AnimatedSprite2D = $AnimatedSprite2D
 @onready var collision_shape_2d: CollisionShape2D = $CollisionShape2D
-@onready var gpu_particles_2d: GPUParticles2D = $GPUParticles2D
+@onready var gpu_particles_2d_x_tuning: GPUParticles2D = $GPUParticles2D
 
 var _gpu_mat: ParticleProcessMaterial = null
 
@@ -81,8 +81,8 @@ const STICK_NORMAL = preload("uid://d168j72ka1a35")
 const STICK_CROUCH = preload("uid://c5p4qg4p8701i")
 
 func _ready() -> void:
-	if gpu_particles_2d and gpu_particles_2d.process_material is ParticleProcessMaterial:
-		_gpu_mat = gpu_particles_2d.process_material as ParticleProcessMaterial
+	if gpu_particles_2d_x_tuning and gpu_particles_2d_x_tuning.process_material is ParticleProcessMaterial:
+		_gpu_mat = gpu_particles_2d_x_tuning.process_material as ParticleProcessMaterial
 
 	was_on_floor = is_on_floor()
 	update_hitbox()
@@ -214,7 +214,7 @@ func _handle_jump_input() -> void:
 		_start_jump(jump_force, allow_variable_cut)
 		return
 
-	# Double jump: requires a fresh press.
+	# Double jump: the jump is less powerful
 	if jump_pressed and not is_on_floor() and air_jumps_used < max_air_jumps:
 		air_jumps_used += 1
 		_start_jump(jump_force * 0.92, enable_variable_jump)
@@ -274,8 +274,8 @@ func start_respawn_lock(duration: float = 0.75) -> void:
 	current_state = State.Idle
 	was_on_floor = is_on_floor()
 
-	if gpu_particles_2d:
-		gpu_particles_2d.emitting = false
+	if gpu_particles_2d_x_tuning:
+		gpu_particles_2d_x_tuning.emitting = false
 
 	update_animation()
 
@@ -312,8 +312,8 @@ func _apply_turn_movement(delta: float, prev_velocity_x: float) -> void:
 	if animated_sprite_2d.animation != &"turn":
 		animated_sprite_2d.play(&"turn")
 
-	if gpu_particles_2d:
-		gpu_particles_2d.emitting = true
+	if gpu_particles_2d_x_tuning:
+		gpu_particles_2d_x_tuning.emitting = true
 
 func handle_landing() -> void:
 	var on_floor_now: bool = is_on_floor()
@@ -375,7 +375,7 @@ func _update_facing() -> void:
 	animated_sprite_2d.flip_h = last_dir < 0
 
 func _update_dust_particles() -> void:
-	if not gpu_particles_2d:
+	if not gpu_particles_2d_x_tuning:
 		return
 
 	var should_emit: bool = (
@@ -387,18 +387,18 @@ func _update_dust_particles() -> void:
 		)
 	)
 
-	gpu_particles_2d.emitting = should_emit
+	gpu_particles_2d_x_tuning.emitting = should_emit
 
 	if not should_emit:
-		gpu_particles_2d.position.x = 0.0
+		gpu_particles_2d_x_tuning.position.x = 0.0
 		return
 
 	var facing_direction: float = float(last_dir)
 
 	if current_state == State.Skid or current_state == State.Turn:
-		gpu_particles_2d.position.x = facing_direction * skid_particle_front_offset
+		gpu_particles_2d_x_tuning.position.x = facing_direction * skid_particle_front_offset
 	else:
-		gpu_particles_2d.position.x = facing_direction * normal_particle_offset
+		gpu_particles_2d_x_tuning.position.x = facing_direction * normal_particle_offset
 
 	if _gpu_mat:
 		_gpu_mat.direction = Vector3(-facing_direction, 0.0, 0.0)

@@ -247,10 +247,10 @@ lifetime_randomness = 0.21
 particle_flag_disable_z = true
 emission_shape = 3
 emission_box_extents = Vector3(1, 1, 1)
-direction = Vector3(-3, 0, -3)
+direction = Vector3(0, -20, -3)
 initial_velocity_min = 20.0
 initial_velocity_max = 40.0
-gravity = Vector3(-80, -38, 0)
+gravity = Vector3(0, -38, -30)
 use_scale_3d = true
 scale_3d_min = Vector3(1, 1, 1)
 scale_3d_max = Vector3(1, 1, 1)
@@ -276,6 +276,17 @@ emitting = false
 amount = 20
 texture = ExtResource("4_m0jdc")
 one_shot = true
+explosiveness = 0.06
+randomness = 0.3
+process_material = SubResource("ParticleProcessMaterial_rrtyo")
+
+[node name="GPUParticles2D2" type="GPUParticles2D" parent="." unique_id=1787896311]
+position = Vector2(0, 24)
+emitting = false
+amount = 5
+texture = ExtResource("4_m0jdc")
+one_shot = true
+randomness = 0.7
 process_material = SubResource("ParticleProcessMaterial_rrtyo")
 
 [connection signal="animation_finished" from="AnimatedSprite2D" to="." method="_on_animated_sprite_2d_animation_finished"]
