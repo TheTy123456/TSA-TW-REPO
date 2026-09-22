@@ -196,7 +196,7 @@ animations = [{
 "speed": 12.0
 }, {
 "frames": [{
-"duration": 1.0,
+"duration": 10.0,
 "texture": SubResource("AtlasTexture_mdf2q")
 }],
 "loop": 0,
@@ -263,7 +263,7 @@ auto_jump = true
 
 [node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="." unique_id=129367735]
 sprite_frames = SubResource("SpriteFrames_j1cus")
-animation = &"walk"
+animation = &"skid"
 autoplay = "idle"
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="." unique_id=821858130]
