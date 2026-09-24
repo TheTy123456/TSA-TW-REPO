@@ -258,6 +258,7 @@ scale_curve = SubResource("CurveTexture_8v6j0")
 color_ramp = SubResource("GradientTexture1D_pxycb")
 
 [node name="Stick" type="CharacterBody2D" unique_id=342837933]
+collision_layer = 2
 script = ExtResource("1_1hssm")
 auto_jump = true
 

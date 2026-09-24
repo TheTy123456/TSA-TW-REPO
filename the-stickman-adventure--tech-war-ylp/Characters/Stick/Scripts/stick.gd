@@ -88,6 +88,7 @@ func _ready() -> void:
 	update_hitbox()
 	start_respawn_lock(spawn_lock_duration)
 
+	
 func _physics_process(delta: float) -> void:
 	turn_cooldown = max(turn_cooldown - delta, 0.0)
 

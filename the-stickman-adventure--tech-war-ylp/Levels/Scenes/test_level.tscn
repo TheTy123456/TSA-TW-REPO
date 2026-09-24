@@ -6,6 +6,7 @@
 [ext_resource type="Script" uid="uid://b8umvwi02o8km" path="res://Mechanics/Scripts/camera_2d.gd" id="4_wtpou"]
 [ext_resource type="PackedScene" uid="uid://d1aqq35qid7gv" path="res://UI Mechanics/Transitions/Scenes/circle_transition.tscn" id="5_kmo6j"]
 [ext_resource type="PackedScene" uid="uid://cws1ithn2s6tq" path="res://text.tscn" id="6_agw3v"]
+[ext_resource type="PackedScene" uid="uid://dj645l5bmvsre" path="res://rail.tscn" id="7_3qix0"]
 
 [sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_1c2mv"]
 texture = ExtResource("2_agw3v")
@@ -34,7 +35,7 @@ tile_map_data = PackedByteArray("AAAAAP//AAACAAEAAAAAAAAAAAACAAEAAAAAAAEAAAACAAE
 tile_set = SubResource("TileSet_rrtyo")
 
 [node name="Stick" parent="." unique_id=342837933 instance=ExtResource("3_3qix0")]
-position = Vector2(69, -40)
+position = Vector2(-2215, -961)
 respawn_position = Vector2(65, -20)
 
 [node name="Camera2D" type="Camera2D" parent="." unique_id=7559479 node_paths=PackedStringArray("player")]
@@ -55,7 +56,11 @@ position = Vector2(-70.5, 715)
 shape = SubResource("RectangleShape2D_rrtyo")
 
 [node name="Transitions" parent="." unique_id=938060551 instance=ExtResource("5_kmo6j")]
+visible = false
 
 [node name="Instructions" parent="." unique_id=1816361871 instance=ExtResource("6_agw3v")]
+
+[node name="Rail" parent="." unique_id=795965899 instance=ExtResource("7_3qix0")]
+position = Vector2(-2173, -699)
 
 [connection signal="body_entered" from="FallDeathArea" to="Stick" method="_on_fall_death_area_body_entered"]
