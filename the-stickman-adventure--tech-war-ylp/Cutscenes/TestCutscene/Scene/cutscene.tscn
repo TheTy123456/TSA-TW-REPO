@@ -1,10 +1,10 @@
 [gd_scene format=3 uid="uid://c3t7noa78nndq"]
 
-[ext_resource type="Texture2D" uid="uid://d1ckha3ce4ykg" path="res://Cutscenes/TestCutscene/Sprites/pixil-frame-0.png" id="1_8vcau"]
-[ext_resource type="Script" uid="uid://cwixwkv061xel" path="res://Cutscenes/TestCutscene/Scripts/cutscene.gd" id="1_ix241"]
-[ext_resource type="PackedScene" uid="uid://d1aqq35qid7gv" path="res://UI Mechanics/Transitions/Scenes/circle_transition.tscn" id="1_ye7fo"]
-[ext_resource type="Texture2D" uid="uid://c6f3g5e8y8tf" path="res://Cutscenes/TestCutscene/Sprites/pixil-frame-1.png" id="2_bl24s"]
-[ext_resource type="Texture2D" uid="uid://bueu8fxkbihyu" path="res://Cutscenes/TestCutscene/Sprites/pixil-frame-2.png" id="3_u4yv4"]
+[ext_resource type="Script" uid="uid://cwixwkv061xel" path="res://Cutscenes/TestCutscene/Scripts/cutscene.gd" id="1_0ts5c"]
+[ext_resource type="Texture2D" uid="uid://d1ckha3ce4ykg" path="res://Cutscenes/TestCutscene/Sprites/pixil-frame-0.png" id="2_whhub"]
+[ext_resource type="Texture2D" uid="uid://c6f3g5e8y8tf" path="res://Cutscenes/TestCutscene/Sprites/pixil-frame-1.png" id="3_dgw42"]
+[ext_resource type="Texture2D" uid="uid://bueu8fxkbihyu" path="res://Cutscenes/TestCutscene/Sprites/pixil-frame-2.png" id="4_xshtw"]
+[ext_resource type="PackedScene" uid="uid://d1aqq35qid7gv" path="res://UI Mechanics/Transitions/Scenes/circle_transition.tscn" id="5_0gqst"]
 
 [sub_resource type="Animation" id="Animation_u4yv4"]
 length = 0.001
@@ -18,7 +18,7 @@ tracks/0/keys = {
 "times": PackedFloat32Array(0),
 "transitions": PackedFloat32Array(1),
 "update": 1,
-"values": [ExtResource("1_8vcau")]
+"values": [ExtResource("2_whhub")]
 }
 
 [sub_resource type="Animation" id="Animation_8vcau"]
@@ -35,7 +35,7 @@ tracks/0/keys = {
 "times": PackedFloat32Array(0.001, 0.13333334, 0.26666668),
 "transitions": PackedFloat32Array(1, 1, 1),
 "update": 1,
-"values": [ExtResource("1_8vcau"), ExtResource("2_bl24s"), ExtResource("3_u4yv4")]
+"values": [ExtResource("2_whhub"), ExtResource("3_dgw42"), ExtResource("4_xshtw")]
 }
 
 [sub_resource type="AnimationLibrary" id="AnimationLibrary_bl24s"]
@@ -45,7 +45,7 @@ _data = {
 }
 
 [node name="Cutscenes" type="Node2D" unique_id=1047156857]
-script = ExtResource("1_ix241")
+script = ExtResource("1_0ts5c")
 next_level = "uid://y7a762ler2ku"
 
 [node name="AnimationPlayer" type="AnimationPlayer" parent="." unique_id=635988268]
@@ -53,10 +53,9 @@ libraries/ = SubResource("AnimationLibrary_bl24s")
 
 [node name="Sprite2D" type="Sprite2D" parent="." unique_id=1412401678]
 position = Vector2(1001.0001, 521)
-scale = Vector2(7.266667, 8.22)
-texture = ExtResource("1_8vcau")
+texture = ExtResource("2_whhub")
 
-[node name="Transitions" parent="." unique_id=1135095852 instance=ExtResource("1_ye7fo")]
+[node name="Transitions" parent="." unique_id=1135095852 instance=ExtResource("5_0gqst")]
 
 [connection signal="animation_finished" from="AnimationPlayer" to="." method="_on_animation_player_animation_finished"]
 
