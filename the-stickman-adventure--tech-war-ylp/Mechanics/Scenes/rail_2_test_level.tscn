@@ -1,0 +1,29 @@
+[gd_scene format=3 uid="uid://ccjbpwt4m3p1g"]
+
+[ext_resource type="Script" uid="uid://dnmu1xaqvogh1" path="res://Mechanics/Scripts/rail.gd" id="1_nkwut"]
+
+[sub_resource type="Curve2D" id="Curve2D_rrtyo"]
+_data = {
+"points": PackedVector2Array(0, 0, 0, 0, 5285.253, -860, -267.72522, -291.55225, 267.72522, 291.55225, 7065, -532, 244.1024, -323.0714, -244.1024, 323.0714, 7073, 318, 370.09073, 7.879791, -370.09073, -7.879791, 6059, 612, 0, 0, 0, 0, 5106, 309, 417.33636, 7.879791, -417.33636, -7.879791, 3494, 647, 393.71353, 15.759582, -393.71353, -15.759582, 2029, 257, 425.21063, 39.398952, -425.21063, -39.398952, 980, 751, 0, 0, 0, 0, 191, 300, -34.671078, 329.37524, 0, 0, -60, -306, -650.0827, -346.7108, 650.0827, 346.7108, 720, -696, 0, 0, 0, 0, 2521.1907, -626)
+}
+point_count = 12
+
+[node name="Rail2_TestLevel" type="Node2D" unique_id=795965899]
+script = ExtResource("1_nkwut")
+rail_speed = 600.0
+
+[node name="Path2D" type="Path2D" parent="." unique_id=1529989368]
+position = Vector2(-126, 24)
+curve = SubResource("Curve2D_rrtyo")
+
+[node name="PathFollow2D" type="PathFollow2D" parent="Path2D" unique_id=644908295]
+position = Vector2(6441, -714)
+rotation = 0.2837941
+
+[node name="Area2D" type="Area2D" parent="." unique_id=1458223653]
+collision_layer = 4
+collision_mask = 3
+
+[node name="CollisionPolygon2D" type="CollisionPolygon2D" parent="Area2D" unique_id=1339632946]
+
+[connection signal="body_entered" from="Area2D" to="." method="_on_area_2d_body_entered"]
