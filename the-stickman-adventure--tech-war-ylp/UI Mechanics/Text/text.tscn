@@ -7,4 +7,6 @@ offset_right = 40.0
 offset_bottom = 23.0
 theme_override_font_sizes/font_size = 45
 text = "To move: A and D, left and right arrows
-To jump: press W or up arrow"
+To jump: press W or up arrow
+To run/sprint: hold shift
+To crouch: S or down arrow"
