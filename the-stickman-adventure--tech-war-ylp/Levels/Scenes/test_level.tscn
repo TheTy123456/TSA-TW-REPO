@@ -65,20 +65,20 @@ visible = false
 [node name="Rail" parent="." unique_id=795965899 instance=ExtResource("7_3qix0")]
 position = Vector2(-2173, -699)
 
-[node name="Rail2_TestLevel" parent="." unique_id=1340059472 instance=ExtResource("8_wtpou")]
+[node name="Rail2" parent="." unique_id=1340059472 instance=ExtResource("8_wtpou")]
 position = Vector2(-3785, 939)
 
-[node name="Path2D" parent="Rail2_TestLevel" index="0" unique_id=1529989368]
+[node name="Path2D" parent="Rail2" index="0" unique_id=1529989368]
 position = Vector2(216.04205, -121)
 scale = Vector2(1.000701, 1)
 
-[node name="PathFollow2D" parent="Rail2_TestLevel/Path2D" index="0" unique_id=644908295]
+[node name="PathFollow2D" parent="Rail2/Path2D" index="0" unique_id=644908295]
 position = Vector2(5285.253, -860)
 rotation = 0.024100639
 
-[node name="CollisionPolygon2D" parent="Rail2_TestLevel/Area2D" parent_id_path=PackedInt32Array(1340059472, 1458223653) index="0" unique_id=1339632946]
+[node name="CollisionPolygon2D" parent="Rail2/Area2D" parent_id_path=PackedInt32Array(1340059472, 1458223653) index="0" unique_id=1339632946]
 polygon = PackedVector2Array(319, -672, 647, -839, 1699, -579, 2627, -700, 2767, -756, 2267, -687, 1557, -697, 560, -995, 211, -770, 50, -208, 617, 595, 1761, 679, 2186, 248, 3634, 684, 5227, 345, 6114, 595, 6790, 554, 7398, 380, 7559, -442, 7285, -741, 6693, -966, 5457, -1039, 5423, -946, 6572, -770, 7114, -619, 7383, -261, 7187, 184, 6453, 419, 5080, 135, 4443, 336, 3671, 443, 2393, 71, 2022, 86, 1425, 448, 1023, 468, 520, 233, 226, -217)
 
 [connection signal="body_entered" from="FallDeathArea" to="Stick" method="_on_fall_death_area_body_entered"]
 
-[editable path="Rail2_TestLevel"]
+[editable path="Rail2"]
