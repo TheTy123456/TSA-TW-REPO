@@ -5,8 +5,8 @@
 [ext_resource type="PackedScene" uid="uid://cs6bpxm5lxm5x" path="res://Characters/Stick/Scenes/stick.tscn" id="3_3qix0"]
 [ext_resource type="Script" uid="uid://b8umvwi02o8km" path="res://Mechanics/Scripts/camera_2d.gd" id="4_wtpou"]
 [ext_resource type="PackedScene" uid="uid://d1aqq35qid7gv" path="res://UI Mechanics/Transitions/Scenes/circle_transition.tscn" id="5_kmo6j"]
-[ext_resource type="PackedScene" uid="uid://cws1ithn2s6tq" path="res://text.tscn" id="6_agw3v"]
-[ext_resource type="PackedScene" uid="uid://dj645l5bmvsre" path="res://rail.tscn" id="7_3qix0"]
+[ext_resource type="PackedScene" uid="uid://cws1ithn2s6tq" path="res://UI Mechanics/Text/text.tscn" id="6_agw3v"]
+[ext_resource type="PackedScene" uid="uid://dj645l5bmvsre" path="res://Mechanics/Scenes/rail.tscn" id="7_3qix0"]
 
 [sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_1c2mv"]
 texture = ExtResource("2_agw3v")
@@ -50,6 +50,7 @@ vertical_smooth = 20.0
 fall_vertical_smoothing = 60.0
 
 [node name="FallDeathArea" type="Area2D" parent="." unique_id=1913693973]
+collision_mask = 2
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="FallDeathArea" unique_id=643289271]
 position = Vector2(-70.5, 715)

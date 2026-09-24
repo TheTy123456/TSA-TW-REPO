@@ -11,6 +11,7 @@ extends Node2D
 @export var rotate_player_with_rail: bool = true
 @export var reverse_direction_on_reentry: bool = true
 @export var jump_action: StringName = &"move_up"
+@export var reentry_cooldown: float = 0.35
 
 var riding: bool = false
 var player: CharacterBody2D = null
@@ -19,6 +20,7 @@ var player: CharacterBody2D = null
 # -1 = travel toward the beginning of the Path2D.
 var travel_direction: int = 1
 var has_used_rail: bool = false
+var reentry_blocked: bool = false
 
 
 func _ready() -> void:
@@ -30,12 +32,6 @@ func _ready() -> void:
 
 func _physics_process(delta: float) -> void:
 	if not riding or player == null:
-		return
-
-	if (
-		Input.is_action_just_pressed(jump_action)
-	):
-		stop_rail(true)
 		return
 
 	var curve: Curve2D = path.curve
@@ -69,6 +65,10 @@ func _physics_process(delta: float) -> void:
 
 	follow.progress = new_progress
 	_update_player_on_rail()
+
+
+func _enable_rail_reentry() -> void:
+	reentry_blocked = false
 
 
 func _set_player_collision_enabled(
@@ -137,7 +137,6 @@ func start_rail(p: CharacterBody2D) -> void:
 	player.set("movement_locked", true)
 	player.velocity = Vector2.ZERO
 
-	# Disable collision while the rail controls the player.
 	_set_player_collision_enabled(player, false)
 
 	player.set_physics_process(false)
@@ -166,11 +165,9 @@ func _restore_player_after_rail(
 	if exiting_player == null:
 		return
 
-	# Move the player slightly away from the rail before restoring collision.
 	var rail_rotation: float = follow.global_rotation
 	var stand_offset: Vector2 = (
-		Vector2.UP.rotated(rail_rotation)
-		* (rail_stand_offset + 8.0)
+		Vector2.UP.rotated(rail_rotation) * (rail_stand_offset + 8.0)
 	)
 
 	exiting_player.global_position = follow.global_position + stand_offset
@@ -211,6 +208,7 @@ func stop_rail(launch_player: bool = true) -> void:
 		return
 
 	riding = false
+	reentry_blocked = true
 
 	var exiting_player: CharacterBody2D = player
 	player = null
@@ -226,6 +224,10 @@ func stop_rail(launch_player: bool = true) -> void:
 		launch_player
 	)
 
+	get_tree().create_timer(reentry_cooldown).timeout.connect(
+		_enable_rail_reentry
+	)
+
 
 func _input(event: InputEvent) -> void:
 	if not riding:
@@ -237,7 +239,7 @@ func _input(event: InputEvent) -> void:
 
 
 func _on_area_2d_body_entered(body: Node2D) -> void:
-	if riding:
+	if riding or reentry_blocked:
 		return
 
 	if body is CharacterBody2D:

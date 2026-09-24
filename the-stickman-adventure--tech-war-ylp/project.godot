@@ -28,6 +28,7 @@ project/assembly_name="The Stickman Adventure- Tech War YLP"
 
 folder_colors={
 "res://Characters/": "orange",
+"res://Cutscenes/": "red",
 "res://Levels/": "green",
 "res://Mechanics/": "gray",
 "res://UI Mechanics/": "purple"

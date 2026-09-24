@@ -1,6 +1,6 @@
 [gd_scene format=3 uid="uid://dj645l5bmvsre"]
 
-[ext_resource type="Script" uid="uid://dnmu1xaqvogh1" path="res://rail.gd" id="1_6f37g"]
+[ext_resource type="Script" uid="uid://dnmu1xaqvogh1" path="res://Mechanics/Scripts/rail.gd" id="1_6f37g"]
 
 [sub_resource type="Curve2D" id="Curve2D_3oyug"]
 bake_interval = 0.01
@@ -9,7 +9,7 @@ _data = {
 }
 point_count = 9
 
-[node name="Node2D" type="Node2D" unique_id=795965899]
+[node name="Rail1_TestLevel" type="Node2D" unique_id=795965899]
 script = ExtResource("1_6f37g")
 rail_speed = 600.0
 
