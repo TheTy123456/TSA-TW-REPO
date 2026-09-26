@@ -59,7 +59,7 @@ func _update_sprite_to_viewport() -> void:
 		return
 
 	# Put the Sprite2D in the center of the viewport.
-	cutscene_sprite.position = viewport_size * 0.5
+	cutscene_sprite.position = viewport_size * 0.7
 
 	if not fit_sprite_to_viewport:
 		return

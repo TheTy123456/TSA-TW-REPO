@@ -8,6 +8,7 @@
 [ext_resource type="PackedScene" uid="uid://cws1ithn2s6tq" path="res://UI Mechanics/Text/text.tscn" id="6_agw3v"]
 [ext_resource type="PackedScene" uid="uid://dj645l5bmvsre" path="res://Mechanics/Scenes/rail.tscn" id="7_3qix0"]
 [ext_resource type="PackedScene" uid="uid://ccjbpwt4m3p1g" path="res://Mechanics/Scenes/rail_2_test_level.tscn" id="8_wtpou"]
+[ext_resource type="AudioStream" uid="uid://cw2n4vacw2fnf" path="res://8-1-27.mp3" id="9_kmo6j"]
 
 [sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_1c2mv"]
 texture = ExtResource("2_agw3v")
@@ -64,9 +65,9 @@ shape = SubResource("RectangleShape2D_rrtyo")
 position = Vector2(215, 2404)
 shape = SubResource("RectangleShape2D_wtpou")
 
-[node name="Transitions" parent="." unique_id=938060551 instance=ExtResource("5_kmo6j")]
-
 [node name="Instructions" parent="." unique_id=1816361871 instance=ExtResource("6_agw3v")]
+
+[node name="Transitions" parent="." unique_id=938060551 instance=ExtResource("5_kmo6j")]
 
 [node name="Rail" parent="." unique_id=795965899 instance=ExtResource("7_3qix0")]
 position = Vector2(-2173, -699)
@@ -86,6 +87,10 @@ rotation = 0.024100639
 
 [node name="CollisionPolygon2D" parent="Rail2/Area2D" parent_id_path=PackedInt32Array(1340059472, 1458223653) index="0" unique_id=1339632946]
 polygon = PackedVector2Array(319, -672, 647, -839, 1699, -579, 2627, -700, 2767, -756, 2267, -687, 1557, -697, 560, -995, 211, -770, 50, -208, 617, 595, 1761, 679, 2186, 248, 3634, 684, 5227, 345, 6114, 595, 6790, 554, 7398, 380, 7559, -442, 7285, -741, 6652, -908, 5495, -999, 5489, -967, 6614, -854, 7114, -619, 7383, -261, 7187, 184, 6453, 419, 5080, 135, 4443, 336, 3671, 443, 2393, 71, 2022, 86, 1425, 448, 1023, 468, 520, 233, 226, -217)
+
+[node name="AudioStreamPlayer" type="AudioStreamPlayer" parent="." unique_id=1047654280]
+stream = ExtResource("9_kmo6j")
+autoplay = true
 
 [connection signal="body_entered" from="FallDeathArea" to="Stick" method="_on_fall_death_area_body_entered"]
 
