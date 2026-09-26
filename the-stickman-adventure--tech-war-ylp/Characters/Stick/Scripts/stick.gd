@@ -3,6 +3,7 @@ extends CharacterBody2D
 @onready var animated_sprite_2d: AnimatedSprite2D = $AnimatedSprite2D
 @onready var collision_shape_2d: CollisionShape2D = $CollisionShape2D
 @onready var gpu_particles_2d_x_tuning: GPUParticles2D = $GPUParticles2D
+@export var music_node_path: NodePath = NodePath("../Music")
 
 var _gpu_mat: ParticleProcessMaterial = null
 
@@ -80,6 +81,8 @@ var jump_active: bool = false
 const STICK_NORMAL = preload("uid://d168j72ka1a35")
 const STICK_CROUCH = preload("uid://c5p4qg4p8701i")
 
+var level_music: AudioStreamPlayer = null
+
 func _ready() -> void:
 	if gpu_particles_2d_x_tuning and gpu_particles_2d_x_tuning.process_material is ParticleProcessMaterial:
 		_gpu_mat = gpu_particles_2d_x_tuning.process_material as ParticleProcessMaterial
@@ -88,6 +91,7 @@ func _ready() -> void:
 	update_hitbox()
 	start_respawn_lock(spawn_lock_duration)
 
+	level_music = get_node_or_null(music_node_path) as AudioStreamPlayer
 	
 func _physics_process(delta: float) -> void:
 	turn_cooldown = max(turn_cooldown - delta, 0.0)
@@ -408,21 +412,40 @@ func _on_fall_death_area_body_entered(body: Node2D) -> void:
 	if body != self:
 		return
 
+	if movement_locked:
+		return
+
 	camera_should_follow = false
 
-	var fade = get_tree().current_scene.get_node("Transitions")
-	fade.fade_in_black()
+	# Fade out the music.
+	if level_music != null:
+		var tween: Tween = create_tween()
+		tween.tween_property(level_music, "volume_db", -80.0, 0.5)
+
+	var current_scene: Node = get_tree().current_scene
+	var fade: Node = current_scene.get_node_or_null("Transitions")
+
+	if fade != null:
+		fade.fade_in_black()
 
 	await get_tree().create_timer(0.5).timeout
 
 	global_position = respawn_position
+	velocity = Vector2.ZERO
 	last_dir = 1
 	animated_sprite_2d.flip_h = false
 
 	start_respawn_lock(spawn_lock_duration)
 
 	camera_should_follow = true
-	fade.fade_out_black()
+
+	# Fade the music back in.
+	if level_music != null:
+		var tween: Tween = create_tween()
+		tween.tween_property(level_music, "volume_db", 0.0, 0.5)
+
+	if fade != null:
+		fade.fade_out_black()
 
 func _on_animated_sprite_2d_animation_finished() -> void:
 	if current_state == State.Land:

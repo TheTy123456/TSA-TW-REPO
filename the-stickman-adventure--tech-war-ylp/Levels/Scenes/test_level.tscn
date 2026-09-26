@@ -41,6 +41,7 @@ tile_set = SubResource("TileSet_rrtyo")
 
 [node name="Stick" parent="." unique_id=342837933 instance=ExtResource("3_3qix0")]
 position = Vector2(-2215, -961)
+music_node_path = NodePath("../AudioStreamPlayer")
 respawn_position = Vector2(65, -20)
 
 [node name="Camera2D" type="Camera2D" parent="." unique_id=7559479 node_paths=PackedStringArray("player")]
