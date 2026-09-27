@@ -41,12 +41,13 @@ tile_set = SubResource("TileSet_rrtyo")
 
 [node name="Stick" parent="." unique_id=342837933 instance=ExtResource("3_3qix0")]
 position = Vector2(-2215, -961)
+auto_jump = true
+respawn_position = Vector2(50, -100)
 music_node_path = NodePath("../AudioStreamPlayer")
-respawn_position = Vector2(65, -20)
 
 [node name="Camera2D" type="Camera2D" parent="." unique_id=7559479 node_paths=PackedStringArray("player")]
 position = Vector2(22, -41)
-zoom = Vector2(3, 3)
+zoom = Vector2(4, 4)
 drag_left_margin = 0.1
 drag_right_margin = 0.1
 script = ExtResource("4_wtpou")
@@ -69,6 +70,7 @@ shape = SubResource("RectangleShape2D_wtpou")
 [node name="Instructions" parent="." unique_id=1816361871 instance=ExtResource("6_agw3v")]
 
 [node name="Transitions" parent="." unique_id=938060551 instance=ExtResource("5_kmo6j")]
+visible = false
 
 [node name="Rail" parent="." unique_id=795965899 instance=ExtResource("7_3qix0")]
 position = Vector2(-2173, -699)
