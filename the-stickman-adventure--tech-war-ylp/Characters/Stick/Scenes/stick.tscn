@@ -85,10 +85,6 @@ region = Rect2(7600, 0, 200, 200)
 atlas = ExtResource("2_m0jdc")
 region = Rect2(7800, 0, 200, 200)
 
-[sub_resource type="AtlasTexture" id="AtlasTexture_1udt1"]
-atlas = ExtResource("2_m0jdc")
-region = Rect2(4400, 0, 200, 200)
-
 [sub_resource type="AtlasTexture" id="AtlasTexture_salup"]
 atlas = ExtResource("2_m0jdc")
 region = Rect2(4600, 0, 200, 200)
@@ -160,7 +156,7 @@ animations = [{
 "speed": 24.0
 }, {
 "frames": [{
-"duration": 1.0,
+"duration": 5.0,
 "texture": SubResource("AtlasTexture_8ca2i")
 }],
 "loop": 0,
@@ -236,9 +232,6 @@ animations = [{
 }, {
 "frames": [{
 "duration": 1.0,
-"texture": SubResource("AtlasTexture_1udt1")
-}, {
-"duration": 100.0,
 "texture": SubResource("AtlasTexture_salup")
 }],
 "loop": 0,
@@ -282,7 +275,7 @@ animations = [{
 }],
 "loop": 0,
 "name": &"turn",
-"speed": 18.0
+"speed": 24.0
 }, {
 "frames": [{
 "duration": 1.0,
@@ -336,10 +329,8 @@ script = ExtResource("1_1hssm")
 
 [node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="." unique_id=129367735]
 sprite_frames = SubResource("SpriteFrames_j1cus")
-animation = &"turn"
+animation = &"double_jump"
 autoplay = "idle"
-frame = 5
-frame_progress = 1.0
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="." unique_id=821858130]
 position = Vector2(0, 7)

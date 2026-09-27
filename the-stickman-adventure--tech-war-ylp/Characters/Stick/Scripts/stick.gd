@@ -24,7 +24,7 @@ var _gpu_mat: ParticleProcessMaterial = null
 @export var coyote_time: float = 0.14
 @export var jump_buffer_time: float = 0.14
 @export var jump_cut_multiplier: float = 0.45
-@export var enable_variable_jump: bool = true
+@export var enable_variable_jump: bool = false
 @export var auto_jump: bool = false
 @export var max_air_jumps: int = 1
 
@@ -87,7 +87,7 @@ var jump_active: bool = false
 # Animation state
 var crouch_reversing: bool = false
 var crouch_release_requested: bool = false
-
+var turn_animation_finished: bool = false
 
 const STICK_NORMAL = preload("uid://d168j72ka1a35")
 const STICK_CROUCH = preload("uid://c5p4qg4p8701i")
@@ -104,7 +104,6 @@ func _ready() -> void:
 			as ParticleProcessMaterial
 		)
 
-	# Set animation speeds in code.
 	if animated_sprite_2d.sprite_frames != null:
 		animated_sprite_2d.sprite_frames.set_animation_speed(
 			&"turn",
@@ -139,7 +138,7 @@ func _physics_process(delta: float) -> void:
 
 	var previous_velocity_x: float = velocity.x
 
-	# Turning animation and movement.
+	# Turn handling
 	if current_state == State.Turn and turn_cooldown > 0.0:
 		_apply_turn_movement(delta, previous_velocity_x)
 		_apply_gravity(delta)
@@ -147,7 +146,6 @@ func _physics_process(delta: float) -> void:
 		_finalize_frame()
 		return
 
-	# Let the landing animation finish before accepting normal movement.
 	if current_state == State.Land:
 		if abs(input_dir) > 0.0:
 			current_state = State.Walk
@@ -178,52 +176,29 @@ func _physics_process(delta: float) -> void:
 		_finalize_frame()
 		return
 
-	# Crouching
-	if is_crouching:
-		current_state = State.Crouch
-		velocity.x = move_toward(
-			previous_velocity_x,
-			input_dir * crouch_speed,
-			acceleration * delta
-		)
-
-	# Running
-	elif is_running and input_dir != 0.0:
-		if (
-			is_on_floor()
-			and abs(previous_velocity_x) < 5.0
-			and current_state != State.Run
-		):
-			current_state = State.WalkStart
-		else:
+	if is_on_floor():
+		if is_crouching:
+			current_state = State.Crouch
+			velocity.x = move_toward(
+				previous_velocity_x,
+				input_dir * crouch_speed,
+				acceleration * delta
+			)
+		elif is_running and input_dir != 0.0:
 			current_state = State.Run
-
-		velocity.x = move_toward(
-			previous_velocity_x,
-			input_dir * run_speed,
-			acceleration * delta
-		)
-
-	# Walking
-	elif input_dir != 0.0:
-		if (
-			is_on_floor()
-			and abs(previous_velocity_x) < 5.0
-			and current_state not in [State.Walk, State.WalkStart]
-		):
-			current_state = State.WalkStart
-		else:
+			velocity.x = move_toward(
+				previous_velocity_x,
+				input_dir * run_speed,
+				acceleration * delta
+			)
+		elif input_dir != 0.0:
 			current_state = State.Walk
-
-		velocity.x = move_toward(
-			previous_velocity_x,
-			input_dir * move_speed,
-			acceleration * delta
-		)
-
-	# No horizontal input
-	else:
-		if is_on_floor():
+			velocity.x = move_toward(
+				previous_velocity_x,
+				input_dir * move_speed,
+				acceleration * delta
+			)
+		else:
 			velocity.x = move_toward(
 				previous_velocity_x,
 				0.0,
@@ -240,6 +215,13 @@ func _physics_process(delta: float) -> void:
 				current_state = State.WalkEnd
 			else:
 				current_state = State.Idle
+	else:
+		if input_dir != 0.0:
+			velocity.x = move_toward(
+				previous_velocity_x,
+				input_dir * move_speed,
+				acceleration * delta * 0.5
+			)
 		else:
 			velocity.x = move_toward(
 				previous_velocity_x,
@@ -249,7 +231,6 @@ func _physics_process(delta: float) -> void:
 
 	_apply_gravity(delta)
 
-	# Keep special jump states from being overwritten while in the air.
 	if not is_on_floor():
 		if current_state == State.DoubleJump:
 			pass
@@ -311,12 +292,9 @@ func _handle_jump_input() -> void:
 
 	var manual_jump_requested: bool = jump_buffer_timer > 0.0
 	var automatic_jump_requested: bool = (
-		auto_jump
-		and jump_held
-		and is_on_floor()
+		auto_jump and jump_held and is_on_floor()
 	)
 
-	# Normal jump.
 	if (
 		coyote_timer > 0.0
 		and (manual_jump_requested or automatic_jump_requested)
@@ -324,11 +302,9 @@ func _handle_jump_input() -> void:
 		jump_buffer_timer = 0.0
 		coyote_timer = 0.0
 		air_jumps_used = 0
-
 		_start_jump(jump_force, true)
 		return
 
-	# Double jump.
 	if (
 		jump_pressed
 		and not is_on_floor()
@@ -350,7 +326,11 @@ func _start_double_jump() -> void:
 	jump_cut_applied = false
 	jump_active = enable_variable_jump
 	current_state = State.DoubleJump
-	animated_sprite_2d.play(&"double_jump")
+
+	if animated_sprite_2d != null:
+		animated_sprite_2d.stop()
+		animated_sprite_2d.frame = 0
+		animated_sprite_2d.play(&"double_jump")
 
 
 func _handle_variable_jump() -> void:
@@ -389,7 +369,6 @@ func _handle_movement_lock(delta: float) -> void:
 		velocity.y = 0.0
 
 	move_and_slide()
-
 	was_on_floor = is_on_floor()
 	update_hitbox()
 
@@ -403,6 +382,7 @@ func _handle_movement_lock(delta: float) -> void:
 
 func _start_turn_animation() -> void:
 	current_state = State.Turn
+	turn_animation_finished = false
 	animated_sprite_2d.stop()
 	animated_sprite_2d.frame = 0
 	animated_sprite_2d.play(&"turn")
@@ -434,7 +414,10 @@ func _apply_turn_movement(
 			turn_acceleration * delta
 		)
 
-	if animated_sprite_2d.animation != &"turn":
+	if (
+		animated_sprite_2d.animation != &"turn"
+		and not turn_animation_finished
+	):
 		animated_sprite_2d.play(&"turn")
 
 	if gpu_particles_2d_x_tuning != null:
@@ -474,6 +457,7 @@ func start_respawn_lock(duration: float = 0.75) -> void:
 	turn_cooldown = 0.0
 	jump_cut_applied = false
 	jump_active = false
+	turn_animation_finished = false
 
 	current_state = State.Idle
 	was_on_floor = is_on_floor()
@@ -494,14 +478,12 @@ func update_hitbox() -> void:
 
 
 func update_animation() -> void:
-	# The reverse crouch animation must be allowed to finish.
 	if crouch_reversing:
 		return
 
 	if crouch_release_requested:
 		crouch_release_requested = false
 		crouch_reversing = true
-
 		animated_sprite_2d.play_backwards(&"crouch")
 		_update_facing()
 		return
@@ -511,39 +493,34 @@ func update_animation() -> void:
 	match current_state:
 		State.Idle:
 			animation_name = &"idle"
-
 		State.Walk:
 			animation_name = &"walk"
-
 		State.Run:
 			animation_name = &"run"
-
 		State.Turn:
 			animation_name = &"turn"
-
 		State.Skid:
 			animation_name = &"skid"
-
 		State.Jump:
 			animation_name = &"single_jump"
-
 		State.DoubleJump:
 			animation_name = &"double_jump"
-
 		State.Fall:
 			animation_name = &"fall"
-
 		State.Crouch:
 			animation_name = &"crouch"
-
 		State.Land:
 			animation_name = &"land"
-
 		State.WalkStart:
 			animation_name = &"start walk"
-
 		State.WalkEnd:
 			animation_name = &"end walk"
+
+	if current_state == State.DoubleJump:
+		if animated_sprite_2d.animation != &"double_jump":
+			animated_sprite_2d.play(&"double_jump")
+		_update_facing()
+		return
 
 	if animated_sprite_2d.animation != animation_name:
 		animated_sprite_2d.play(animation_name)
@@ -628,10 +605,7 @@ func _on_animated_sprite_2d_animation_finished() -> void:
 				current_state = State.Idle
 
 		&"turn":
-			if input_dir != 0.0:
-				current_state = State.Walk
-			else:
-				current_state = State.Idle
+			turn_animation_finished = true
 
 		&"land":
 			if current_state == State.Land:
@@ -641,8 +615,8 @@ func _on_animated_sprite_2d_animation_finished() -> void:
 		&"double_jump":
 			if is_on_floor():
 				current_state = State.Idle
-			elif abs(input_dir) > 0.0:
-				current_state = State.Walk
+			elif velocity.y < 0.0:
+				current_state = State.Jump
 			else:
 				current_state = State.Fall
 
