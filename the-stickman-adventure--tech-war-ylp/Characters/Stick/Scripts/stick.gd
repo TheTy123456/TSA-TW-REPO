@@ -24,9 +24,13 @@ var _gpu_mat: ParticleProcessMaterial = null
 @export var coyote_time: float = 0.14
 @export var jump_buffer_time: float = 0.14
 @export var jump_cut_multiplier: float = 0.45
-@export var enable_variable_jump: bool = false
+@export var enable_variable_jump: bool = true
 @export var auto_jump: bool = false
 @export var max_air_jumps: int = 1
+
+# Momentum boost for jumps (preserves horizontal velocity when jumping while running)
+@export var momentum_jump_boost: float = 0.12
+@export var momentum_max_boost: float = 1.3
 
 # Turn and particles
 @export var turn_slowdown: float = 0.015
@@ -221,17 +225,19 @@ func _physics_process(delta: float) -> void:
 			else:
 				current_state = State.Idle
 	else:
+		# Air control: allow steering but preserve momentum
 		if input_dir != 0.0:
 			velocity.x = move_toward(
 				previous_velocity_x,
-				input_dir * move_speed,
-				acceleration * delta * 0.5
+				input_dir * run_speed,
+				acceleration * delta * 0.85
 			)
 		else:
+			# Slight air deceleration to maintain momentum
 			velocity.x = move_toward(
 				previous_velocity_x,
-				0.0,
-				deceleration * delta
+				previous_velocity_x * 0.95,
+				deceleration * delta * 0.3
 			)
 
 	_apply_gravity(delta)
@@ -320,7 +326,11 @@ func _handle_jump_input() -> void:
 
 
 func _start_jump(force: float, allow_variable_cut: bool) -> void:
-	velocity.y = -force
+	# Add momentum boost from horizontal velocity while jumping
+	var momentum_bonus: float = abs(velocity.x) * momentum_jump_boost
+	var boosted_force: float = min(force + momentum_bonus, force * momentum_max_boost)
+	
+	velocity.y = -boosted_force
 	jump_cut_applied = not allow_variable_cut
 	jump_active = allow_variable_cut
 	current_state = State.Jump
