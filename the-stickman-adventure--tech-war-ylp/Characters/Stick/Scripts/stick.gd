@@ -93,6 +93,11 @@ const STICK_NORMAL = preload("uid://d168j72ka1a35")
 const STICK_CROUCH = preload("uid://c5p4qg4p8701i")
 
 
+func _reset_jump_state() -> void:
+	jump_cut_applied = false
+	jump_active = false
+
+
 func _ready() -> void:
 	if (
 		gpu_particles_2d_x_tuning != null
@@ -104,7 +109,7 @@ func _ready() -> void:
 			as ParticleProcessMaterial
 		)
 
-	if animated_sprite_2d.sprite_frames != null:
+	if animated_sprite_2d != null and animated_sprite_2d.sprite_frames != null:
 		animated_sprite_2d.sprite_frames.set_animation_speed(
 			&"turn",
 			12.0
@@ -320,6 +325,12 @@ func _start_jump(force: float, allow_variable_cut: bool) -> void:
 	jump_active = allow_variable_cut
 	current_state = State.Jump
 
+	if animated_sprite_2d != null:
+		animated_sprite_2d.scale = Vector2(1.1, 0.9)
+
+	if gpu_particles_2d_x_tuning != null:
+		gpu_particles_2d_x_tuning.emitting = true
+
 
 func _start_double_jump() -> void:
 	velocity.y = -(jump_force * 0.92)
@@ -376,6 +387,7 @@ func _handle_movement_lock(delta: float) -> void:
 		movement_locked = false
 		velocity = Vector2.ZERO
 		current_state = State.Idle
+		_reset_jump_state()
 
 	_finalize_frame()
 
@@ -383,9 +395,10 @@ func _handle_movement_lock(delta: float) -> void:
 func _start_turn_animation() -> void:
 	current_state = State.Turn
 	turn_animation_finished = false
-	animated_sprite_2d.stop()
-	animated_sprite_2d.frame = 0
-	animated_sprite_2d.play(&"turn")
+	if animated_sprite_2d != null:
+		animated_sprite_2d.stop()
+		animated_sprite_2d.frame = 0
+		animated_sprite_2d.play(&"turn")
 
 
 func _apply_turn_movement(
@@ -415,7 +428,8 @@ func _apply_turn_movement(
 		)
 
 	if (
-		animated_sprite_2d.animation != &"turn"
+		animated_sprite_2d != null
+		and animated_sprite_2d.animation != &"turn"
 		and not turn_animation_finished
 	):
 		animated_sprite_2d.play(&"turn")
@@ -436,9 +450,12 @@ func handle_landing() -> void:
 		if abs(velocity.x) < 10.0:
 			current_state = State.Land
 			landing = true
-			animated_sprite_2d.play(&"land")
+			if animated_sprite_2d != null:
+				animated_sprite_2d.play(&"land")
 		else:
 			current_state = State.Walk
+
+		_reset_jump_state()
 
 	was_on_floor = on_floor_now
 	update_hitbox()
@@ -455,9 +472,8 @@ func start_respawn_lock(duration: float = 0.75) -> void:
 	landing = false
 	air_jumps_used = 0
 	turn_cooldown = 0.0
-	jump_cut_applied = false
-	jump_active = false
 	turn_animation_finished = false
+	_reset_jump_state()
 
 	current_state = State.Idle
 	was_on_floor = is_on_floor()
@@ -469,6 +485,9 @@ func start_respawn_lock(duration: float = 0.75) -> void:
 
 
 func update_hitbox() -> void:
+	if collision_shape_2d == null:
+		return
+
 	if is_crouching:
 		collision_shape_2d.shape = STICK_CROUCH
 		collision_shape_2d.position = Vector2(0, 6)
@@ -478,6 +497,9 @@ func update_hitbox() -> void:
 
 
 func update_animation() -> void:
+	if animated_sprite_2d == null:
+		return
+
 	if crouch_reversing:
 		return
 
@@ -529,6 +551,9 @@ func update_animation() -> void:
 
 
 func _update_facing() -> void:
+	if animated_sprite_2d == null:
+		return
+
 	animated_sprite_2d.flip_h = last_dir < 0
 
 
@@ -657,7 +682,8 @@ func _on_fall_death_area_body_entered(body: Node2D) -> void:
 	global_position = respawn_position
 	velocity = Vector2.ZERO
 	last_dir = 1
-	animated_sprite_2d.flip_h = false
+	if animated_sprite_2d != null:
+		animated_sprite_2d.flip_h = false
 
 	start_respawn_lock(spawn_lock_duration)
 
