@@ -1,246 +1,202 @@
 extends Node2D
 
+# Path nodes for the rail path and trigger area.
 @onready var path: Path2D = $Path2D
-@onready var follow: PathFollow2D = $Path2D/PathFollow2D
 @onready var rail_area: Area2D = $Area2D
 
-@export var rail_speed: float = 400.0
+# Rail tuning
+@export var loop_speed: float = 400.0
 @export var exit_jump_force: float = 350.0
 @export var exit_forward_force: float = 80.0
-@export var rail_stand_offset: float = 16.0
-@export var rotate_player_with_rail: bool = true
-@export var reverse_direction_on_reentry: bool = true
-@export var jump_action: StringName = &"move_up"
-@export var reentry_cooldown: float = 0.35
 
-var riding: bool = false
-var player: CharacterBody2D = null
+# Track all riders currently on the rail.
+var riders: Array[CharacterBody2D] = []
 
-# 1 = travel toward the end of the Path2D.
-# -1 = travel toward the beginning of the Path2D.
-var travel_direction: int = 1
-var has_used_rail: bool = false
-var reentry_blocked: bool = false
+# Store each rider's path follower so each rider has an independent offset.
+var rider_follows: Dictionary = {}
+
+# Store each rider's direction to move back and forth along the path.
+var rider_directions: Dictionary = {}
 
 
 func _ready() -> void:
-	follow.loop = false
+	# Connect the Area2D signals in code since we need to handle input.
+	rail_area.body_entered.connect(_on_area_2d_body_entered)
+	rail_area.body_exited.connect(_on_area_2d_body_exited)
 
-	if not rail_area.body_entered.is_connected(_on_area_2d_body_entered):
-		rail_area.body_entered.connect(_on_area_2d_body_entered)
+
+func _input(event: InputEvent) -> void:
+	# Check if any rider (who is in the player group) presses jump.
+	if not event.is_action_pressed("move_up"):
+		return
+
+	for rider in riders:
+		if is_instance_valid(rider) and rider.is_in_group("player"):
+			# Player jumped while on rail - remove them.
+			stop_loop(rider)
+			get_viewport().set_input_as_handled()
+			return
 
 
 func _physics_process(delta: float) -> void:
-	if not riding or player == null:
+	# If nobody is riding, do nothing.
+	if riders.is_empty():
 		return
 
-	var curve: Curve2D = path.curve
-
-	if curve == null:
-		stop_rail(false)
-		return
-
-	var curve_length: float = curve.get_baked_length()
-
-	if curve_length <= 0.0:
-		stop_rail(false)
-		return
-
-	var new_progress: float = (
-		follow.progress
-		+ rail_speed * delta * float(travel_direction)
-	)
-
-	if travel_direction > 0 and new_progress >= curve_length:
-		follow.progress = curve_length
-		_update_player_on_rail()
-		stop_rail(true)
-		return
-
-	if travel_direction < 0 and new_progress <= 0.0:
-		follow.progress = 0.0
-		_update_player_on_rail()
-		stop_rail(true)
-		return
-
-	follow.progress = new_progress
-	_update_player_on_rail()
-
-
-func _enable_rail_reentry() -> void:
-	reentry_blocked = false
-
-
-func _set_player_collision_enabled(
-	target_player: CharacterBody2D,
-	enabled: bool
-) -> void:
-	if target_player == null:
-		return
-
-	var collision: CollisionShape2D = (
-		target_player.get_node_or_null("CollisionShape2D")
-		as CollisionShape2D
-	)
-
-	if collision != null:
-		collision.set_deferred("disabled", not enabled)
-
-
-func _update_player_on_rail() -> void:
-	if player == null:
-		return
-
-	var rail_rotation: float = follow.global_rotation
-	var stand_offset: Vector2 = (
-		Vector2.UP.rotated(rail_rotation) * rail_stand_offset
-	)
-
-	player.global_position = follow.global_position + stand_offset
-
-	if rotate_player_with_rail:
-		player.global_rotation = rail_rotation
-	else:
-		player.global_rotation = 0.0
-
-	var sprite: AnimatedSprite2D = (
-		player.get_node_or_null("AnimatedSprite2D")
-		as AnimatedSprite2D
-	)
-
-	if sprite != null:
-		sprite.flip_h = travel_direction < 0
-
-
-func start_rail(p: CharacterBody2D) -> void:
-	if p == null or riding:
-		return
-
-	var curve: Curve2D = path.curve
+	var curve := path.curve
 
 	if curve == null:
 		return
 
-	var curve_length: float = curve.get_baked_length()
+	var curve_length := curve.get_baked_length()
 
 	if curve_length <= 0.0:
 		return
 
-	player = p
-	riding = true
+	var riders_to_stop: Array[CharacterBody2D] = []
 
-	if has_used_rail and reverse_direction_on_reentry:
-		travel_direction *= -1
+	# Update each rider's position along the rail.
+	for rider in riders:
+		if not is_instance_valid(rider):
+			riders_to_stop.append(rider)
+			continue
 
-	has_used_rail = true
+		var rider_follow: PathFollow2D = rider_follows.get(rider)
 
-	player.set("movement_locked", true)
-	player.velocity = Vector2.ZERO
+		if rider_follow == null:
+			riders_to_stop.append(rider)
+			continue
 
-	_set_player_collision_enabled(player, false)
+		var direction: float = rider_directions.get(rider, 1.0)
+		rider_follow.progress += loop_speed * delta * direction
 
-	player.set_physics_process(false)
+		# If direction is positive and rider reached end, stop them.
+		if direction > 0 and rider_follow.progress >= curve_length:
+			rider_follow.progress = curve_length
+			rider.global_position = rider_follow.global_position
+			rider.global_rotation = rider_follow.global_rotation
+			riders_to_stop.append(rider)
 
-	var local_player_position: Vector2 = (
-		path.to_local(player.global_position)
-	)
+		# If direction is negative and rider reached start, stop them.
+		elif direction < 0 and rider_follow.progress <= 0.0:
+			rider_follow.progress = 0.0
+			rider.global_position = rider_follow.global_position
+			rider.global_rotation = rider_follow.global_rotation
+			riders_to_stop.append(rider)
 
-	var closest_progress: float = (
-		curve.get_closest_offset(local_player_position)
-	)
+		# Otherwise keep them moving along the path.
+		else:
+			rider.global_position = rider_follow.global_position
+			rider.global_rotation = rider_follow.global_rotation
 
-	follow.progress = clamp(
-		closest_progress,
+	# Remove riders that reached the end/start.
+	for rider in riders_to_stop:
+		if is_instance_valid(rider):
+			stop_loop(rider)
+		else:
+			riders.erase(rider)
+			rider_follows.erase(rider)
+			rider_directions.erase(rider)
+
+
+func start_loop(body: CharacterBody2D) -> void:
+	# Ignore null or duplicate riders.
+	if body == null or body in riders:
+		return
+
+	if path.curve == null:
+		return
+
+	var curve_length := path.curve.get_baked_length()
+
+	if curve_length <= 0.0:
+		return
+
+	# Create a dedicated PathFollow2D for this rider.
+	var rider_follow := PathFollow2D.new()
+	rider_follow.loop = false
+	rider_follow.rotates = true
+
+	path.add_child(rider_follow)
+
+	# Place the rider on the closest point on the path.
+	var local_position := path.to_local(body.global_position)
+	rider_follow.progress = clamp(
+		path.curve.get_closest_offset(local_position),
 		0.0,
 		curve_length
 	)
 
-	_update_player_on_rail()
+	# Save this rider and its follower.
+	riders.append(body)
+	rider_follows[body] = rider_follow
+
+	# Reverse direction each time a rider re-enters.
+	var previous_direction: float = rider_directions.get(body, 1.0)
+	var new_direction: float = -previous_direction
+	rider_directions[body] = new_direction
+
+	# Tell the character it is on the rail.
+	if body.has_method("set_on_rail"):
+		body.set_on_rail(true)
+
+	# Save the rail reference on the body so the player can jump off later.
+	body.set_meta("rail_node", self)
+
+	# Reset body movement and snap to the rail position.
+	body.velocity = Vector2.ZERO
+	body.global_position = rider_follow.global_position
+	body.global_rotation = rider_follow.global_rotation
 
 
-func _restore_player_after_rail(
-	exiting_player: CharacterBody2D,
-	launch_player: bool
-) -> void:
-	if exiting_player == null:
+func stop_loop(body: CharacterBody2D) -> void:
+	# Ignore null or non-riding bodies.
+	if body == null or body not in riders:
 		return
 
-	var rail_rotation: float = follow.global_rotation
-	var stand_offset: Vector2 = (
-		Vector2.UP.rotated(rail_rotation) * (rail_stand_offset + 8.0)
-	)
+	var rider_follow: PathFollow2D = rider_follows.get(body)
 
-	exiting_player.global_position = follow.global_position + stand_offset
-	exiting_player.global_rotation = 0.0
+	var exit_position := body.global_position
+	var exit_rotation := body.global_rotation
 
-	var sprite: AnimatedSprite2D = (
-		exiting_player.get_node_or_null("AnimatedSprite2D")
-		as AnimatedSprite2D
-	)
+	if rider_follow != null:
+		exit_position = rider_follow.global_position
+		exit_rotation = rider_follow.global_rotation
 
-	if sprite != null:
-		sprite.rotation = 0.0
-		sprite.flip_h = false
+	# Remove rider from the rail tracking.
+	riders.erase(body)
+	rider_follows.erase(body)
 
-	exiting_player.set("movement_locked", false)
-	exiting_player.set_physics_process(true)
+	if is_instance_valid(rider_follow):
+		rider_follow.queue_free()
 
-	_set_player_collision_enabled(exiting_player, true)
-
-	if launch_player:
-		var push_direction: Vector2 = Vector2.RIGHT.rotated(
-			follow.global_rotation
-		)
-
-		if travel_direction < 0:
-			push_direction = -push_direction
-
-		exiting_player.velocity = (
-			push_direction * exit_forward_force
-			+ Vector2.UP * exit_jump_force
-		)
-	else:
-		exiting_player.velocity = Vector2.ZERO
-
-
-func stop_rail(launch_player: bool = true) -> void:
-	if not riding:
+	if not is_instance_valid(body):
 		return
 
-	riding = false
-	reentry_blocked = true
+	# Move the body off the rail and reset rotation.
+	body.global_position = exit_position
+	body.global_rotation = 0.0
 
-	var exiting_player: CharacterBody2D = player
-	player = null
+	if body.has_method("set_on_rail"):
+		body.set_on_rail(false)
 
-	if exiting_player == null:
-		return
+	# Launch the character forward/up as they leave the rail.
+	var exit_direction := Vector2.RIGHT.rotated(exit_rotation)
+	var current_direction: float = rider_directions.get(body, 1.0)
 
-	exiting_player.velocity = Vector2.ZERO
-
-	call_deferred(
-		"_restore_player_after_rail",
-		exiting_player,
-		launch_player
+	body.velocity = (
+		exit_direction * exit_forward_force * current_direction
+		+ Vector2.UP * exit_jump_force
 	)
-
-	get_tree().create_timer(reentry_cooldown).timeout.connect(
-		_enable_rail_reentry
-	)
-
-
-func _input(event: InputEvent) -> void:
-	if not riding:
-		return
-
-	if event.is_action_pressed(jump_action):
-		stop_rail(true)
-		get_viewport().set_input_as_handled()
 
 
 func _on_area_2d_body_entered(body: Node2D) -> void:
-	if riding or reentry_blocked:
-		return
-
+	# Any CharacterBody2D entering the rail trigger starts riding it.
 	if body is CharacterBody2D:
-		start_rail(body)
+		start_loop(body)
+
+
+func _on_area_2d_body_exited(body: Node2D) -> void:
+	# This is intentionally left blank.
+	# We remove riders only when they hit the end of the path or jump off.
+	pass

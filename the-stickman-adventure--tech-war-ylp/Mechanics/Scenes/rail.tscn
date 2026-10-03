@@ -11,7 +11,6 @@ point_count = 9
 
 [node name="Rail1_TestLevel" type="Node2D" unique_id=795965899]
 script = ExtResource("1_6f37g")
-rail_speed = 600.0
 
 [node name="Path2D" type="Path2D" parent="." unique_id=1529989368]
 position = Vector2(-126, 24)
@@ -20,12 +19,14 @@ curve = SubResource("Curve2D_3oyug")
 [node name="PathFollow2D" type="PathFollow2D" parent="Path2D" unique_id=644908295]
 position = Vector2(76, 221)
 rotation = -1.0821375
+loop = false
 
 [node name="Area2D" type="Area2D" parent="." unique_id=1458223653]
-collision_layer = 4
-collision_mask = 3
+collision_layer = 0
+collision_mask = 2
 
 [node name="CollisionPolygon2D" type="CollisionPolygon2D" parent="Area2D" unique_id=1339632946]
 polygon = PackedVector2Array(-80, 277, 43, 176, 176, 182, 229, 240, 197, 582, 280, 631, 568, 657, 629, 600, 656, 471, 625, 479, 509, 619, 255, 549, 246, 454, 458, 540, 658, 466, 696, 451, 1129, 232, 1433, 191, 1585, 262, 1712, 559, 1875, 772, 2103, 720, 2167, 664, 2092, 697, 1901, 694, 1748, 519, 1672, 285, 1539, 134, 1520, 87, 1106, 173, 628, 423, 452, 484, 321, 411, 319, 302, 419, 204, 525, 239, 588, 316, 621, 423, 634, 420, 626, 286, 488, 167, 396, 174, 293, 262, 249, 455, 286, 240, 205, 119, 98, 108, 15, 147)
 
 [connection signal="body_entered" from="Area2D" to="." method="_on_area_2d_body_entered"]
+[connection signal="body_exited" from="Area2D" to="." method="_on_area_2d_body_exited"]

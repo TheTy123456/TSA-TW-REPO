@@ -32,7 +32,9 @@ folder_colors={
 "res://Characters/": "orange",
 "res://Cutscenes/": "red",
 "res://Levels/": "green",
+"res://Main Audio/": "blue",
 "res://Mechanics/": "gray",
+"res://Tilesets/": "yellow",
 "res://UI Mechanics/": "purple"
 }
 

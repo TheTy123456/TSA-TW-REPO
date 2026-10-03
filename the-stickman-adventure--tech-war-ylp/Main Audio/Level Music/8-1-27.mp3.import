@@ -1,0 +1,19 @@
+[remap]
+
+importer="mp3"
+type="AudioStreamMP3"
+uid="uid://cw2n4vacw2fnf"
+path="res://.godot/imported/8-1-27.mp3-fe8a0b565cd009bf8aa96c7ab8b4932e.mp3str"
+
+[deps]
+
+source_file="res://Main Audio/Level Music/8-1-27.mp3"
+dest_files=["res://.godot/imported/8-1-27.mp3-fe8a0b565cd009bf8aa96c7ab8b4932e.mp3str"]
+
+[params]
+
+loop=true
+loop_offset=0.0
+bpm=0.0
+beat_count=0
+bar_beats=4

@@ -10,20 +10,21 @@ point_count = 12
 
 [node name="Rail2_TestLevel" type="Node2D" unique_id=795965899]
 script = ExtResource("1_nkwut")
-rail_speed = 600.0
 
 [node name="Path2D" type="Path2D" parent="." unique_id=1529989368]
 position = Vector2(-126, 24)
 curve = SubResource("Curve2D_rrtyo")
 
 [node name="PathFollow2D" type="PathFollow2D" parent="Path2D" unique_id=644908295]
-position = Vector2(6441, -714)
-rotation = 0.2837941
+position = Vector2(5285.253, -860)
+rotation = 0.024100639
+loop = false
 
 [node name="Area2D" type="Area2D" parent="." unique_id=1458223653]
-collision_layer = 4
-collision_mask = 3
+collision_layer = 0
+collision_mask = 2
 
 [node name="CollisionPolygon2D" type="CollisionPolygon2D" parent="Area2D" unique_id=1339632946]
 
 [connection signal="body_entered" from="Area2D" to="." method="_on_area_2d_body_entered"]
+[connection signal="body_exited" from="Area2D" to="." method="_on_area_2d_body_exited"]
