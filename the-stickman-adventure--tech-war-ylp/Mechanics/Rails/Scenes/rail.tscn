@@ -1,6 +1,6 @@
 [gd_scene format=3 uid="uid://dj645l5bmvsre"]
 
-[ext_resource type="Script" uid="uid://dnmu1xaqvogh1" path="res://Mechanics/Scripts/rail.gd" id="1_6f37g"]
+[ext_resource type="Script" uid="uid://dnmu1xaqvogh1" path="res://Mechanics/Rails/Scripts/rail.gd" id="1_6f37g"]
 [ext_resource type="Texture2D" uid="uid://csip3bgiwwa8c" path="res://pixil-frame-1 (5).png" id="2_h5xrt"]
 
 [sub_resource type="Curve2D" id="Curve2D_3oyug"]

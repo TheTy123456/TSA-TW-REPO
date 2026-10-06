@@ -1,6 +1,7 @@
 [gd_scene format=3 uid="uid://ccjbpwt4m3p1g"]
 
-[ext_resource type="Script" uid="uid://dnmu1xaqvogh1" path="res://Mechanics/Scripts/rail.gd" id="1_nkwut"]
+[ext_resource type="Script" uid="uid://dnmu1xaqvogh1" path="res://Mechanics/Rails/Scripts/rail.gd" id="1_nkwut"]
+[ext_resource type="Texture2D" uid="uid://bdhotek3kcqn1" path="res://pixil-frame-2 (2).png" id="2_tpn33"]
 
 [sub_resource type="Curve2D" id="Curve2D_rrtyo"]
 _data = {
@@ -25,6 +26,13 @@ collision_layer = 0
 collision_mask = 2
 
 [node name="CollisionPolygon2D" type="CollisionPolygon2D" parent="Area2D" unique_id=1339632946]
+
+[node name="Line2D" type="Line2D" parent="." unique_id=1957359056]
+texture_repeat = 2
+position = Vector2(-127, 25)
+width = 16.0
+texture = ExtResource("2_tpn33")
+texture_mode = 1
 
 [connection signal="body_entered" from="Area2D" to="." method="_on_area_2d_body_entered"]
 [connection signal="body_exited" from="Area2D" to="." method="_on_area_2d_body_exited"]

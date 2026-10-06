@@ -7,6 +7,7 @@ extends Node2D
 @export var loop_speed: float = 400.0
 @export var exit_jump_force: float = 350.0
 @export var exit_forward_force: float = 80.0
+@export var rail_height_offset: float = -20.0
 
 var riders: Array[CharacterBody2D] = []
 var rider_follows: Dictionary = {}
@@ -14,11 +15,12 @@ var rider_directions: Dictionary = {}
 
 
 func _ready() -> void:
-	# Connect signals
-	rail_area.body_entered.connect(_on_area_2d_body_entered)
-	rail_area.body_exited.connect(_on_area_2d_body_exited)
+	if not rail_area.is_connected("body_entered", Callable(self, "_on_area_2d_body_entered")):
+		rail_area.body_entered.connect(_on_area_2d_body_entered)
+	
+	if not rail_area.is_connected("body_exited", Callable(self, "_on_area_2d_body_exited")):
+		rail_area.body_exited.connect(_on_area_2d_body_exited)
 
-	# --- SAFETY CHECKS ---
 	if line_2d == null:
 		push_error("Line2D node not found! Make sure it is named 'Line2D'.")
 		return
@@ -32,25 +34,10 @@ func _ready() -> void:
 		push_error("Path2D has no curve!")
 		return
 
-	# --- COPY POINTS FROM PATH2D → LINE2D ---
 	line_2d.clear_points()
-
-	# Use baked points for smooth rails
 	var baked_points := curve.get_baked_points()
-
 	for p in baked_points:
 		line_2d.add_point(p)
-
-
-func _input(event: InputEvent) -> void:
-	if not event.is_action_pressed("move_up"):
-		return
-
-	for rider in riders:
-		if is_instance_valid(rider) and rider.is_in_group("player"):
-			stop_loop(rider)
-			get_viewport().set_input_as_handled()
-			return
 
 
 func _physics_process(delta: float) -> void:
@@ -80,20 +67,22 @@ func _physics_process(delta: float) -> void:
 		var direction: float = rider_directions.get(rider, 1.0)
 		rider_follow.progress += loop_speed * delta * direction
 
+		# Check if reached end of rail
 		if direction > 0 and rider_follow.progress >= curve_length:
 			rider_follow.progress = curve_length
-			rider.global_position = rider_follow.global_position
+			rider.global_position = rider_follow.global_position + Vector2(0, rail_height_offset)
 			rider.global_rotation = rider_follow.global_rotation
 			riders_to_stop.append(rider)
 
 		elif direction < 0 and rider_follow.progress <= 0.0:
 			rider_follow.progress = 0.0
-			rider.global_position = rider_follow.global_position
+			rider.global_position = rider_follow.global_position + Vector2(0, rail_height_offset)
 			rider.global_rotation = rider_follow.global_rotation
 			riders_to_stop.append(rider)
 
 		else:
-			rider.global_position = rider_follow.global_position
+			# Keep player on rail with offset
+			rider.global_position = rider_follow.global_position + Vector2(0, rail_height_offset)
 			rider.global_rotation = rider_follow.global_rotation
 
 	for rider in riders_to_stop:
@@ -140,8 +129,9 @@ func start_loop(body: CharacterBody2D) -> void:
 
 	body.set_meta("rail_node", self)
 
+	# Position player on top of the rail
 	body.velocity = Vector2.ZERO
-	body.global_position = rider_follow.global_position
+	body.global_position = rider_follow.global_position + Vector2(0, rail_height_offset)
 	body.global_rotation = rider_follow.global_rotation
 
 
@@ -155,7 +145,7 @@ func stop_loop(body: CharacterBody2D) -> void:
 	var exit_rotation := body.global_rotation
 
 	if rider_follow != null:
-		exit_position = rider_follow.global_position
+		exit_position = rider_follow.global_position + Vector2(0, rail_height_offset)
 		exit_rotation = rider_follow.global_rotation
 
 	riders.erase(body)
@@ -187,5 +177,5 @@ func _on_area_2d_body_entered(body: Node2D) -> void:
 		start_loop(body)
 
 
-func _on_area_2d_body_exited(body: Node2D) -> void:
+func _on_area_2d_body_exited(_body: Node2D) -> void:
 	pass
