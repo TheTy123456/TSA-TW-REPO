@@ -1,12 +1,15 @@
 extends CharacterBody2D
 
+# Scene references
 @onready var animated_sprite_2d: AnimatedSprite2D = $AnimatedSprite2D
 @onready var collision_shape_2d: CollisionShape2D = $CollisionShape2D
 @onready var gpu_particles_2d_x_tuning: GPUParticles2D = $GPUParticles2D
 
 var _gpu_mat: ParticleProcessMaterial = null
 
+# ============================================================
 # Movement tuning
+# ============================================================
 @export var move_speed: float = 220.0
 @export var run_speed: float = 340.0
 @export var crouch_speed: float = 70.0
@@ -15,61 +18,84 @@ var _gpu_mat: ParticleProcessMaterial = null
 @export var ground_friction_multiplier: float = 2.0
 @export var turn_reaccel_multiplier: float = 1.7
 
+# ============================================================
 # Jump and gravity
+# ============================================================
 @export var jump_force: float = 430.0
-@export var gravity: float = 900.0
-@export var max_fall_speed: float = 1050.0
+@export var gravity: float = 950.0
+@export var max_fall_speed: float = 1200.0
+@export var fast_fall_multiplier: float = 1.6
 
+# ============================================================
 # Jump settings
-@export var coyote_time: float = 0.14
-@export var jump_buffer_time: float = 0.14
-@export var jump_cut_multiplier: float = 0.45
+# ============================================================
+@export var coyote_time: float = 0.11
+@export var jump_buffer_time: float = 0.11
+@export var jump_cut_multiplier: float = 0.5
 @export var enable_variable_jump: bool = true
 @export var auto_jump: bool = false
 @export var max_air_jumps: int = 1
 
-@export var jump_anticipation_time := 0.06
-var jump_anticipation_timer := 0.0
+# ============================================================
+# Jump apex hang
+# ============================================================
+@export var apex_hang_threshold: float = 80.0
+@export var apex_gravity_multiplier: float = 0.62
 
-
-# Momentum preserved when jumping while running
+# ============================================================
+# Momentum and air control
+# ============================================================
 @export var momentum_jump_boost: float = 0.12
 @export var momentum_max_boost: float = 1.3
+@export var air_acceleration: float = 2200.0
+@export var air_acceleration_multiplier: float = 0.9
+@export var air_deceleration: float = 900.0
+@export var air_deceleration_multiplier: float = 0.45
+@export var max_air_speed: float = 300.0
 
+# ============================================================
 # Turn and particles
+# ============================================================
 @export var turn_slowdown: float = 0.015
 @export var turn_blend: float = 0.35
 @export var skid_particle_front_offset: float = 18.0
 @export var normal_particle_offset: float = -12.0
 
+# ============================================================
 # Respawn
+# ============================================================
 @export var spawn_lock_duration: float = 0.75
 @export var respawn_position: Vector2 = Vector2.ZERO
-
 @export var rail_height_offset := -20.0
 
+# ============================================================
 # Music
+# ============================================================
 @export var music_node_path: NodePath = NodePath("../Music")
 @export var music_fade_duration: float = 0.5
 
+# ============================================================
+# Wall jump
+# ============================================================
+@export var wall_slide_gravity_multiplier: float = 0.4
+@export var wall_jump_force: float = 450.0
+@export var wall_jump_horizontal_force: float = 300.0
+@export var wall_jump_buffer_time: float = 0.12
+@export var min_wall_contact_time: float = 0.1
+@export var wall_jump_lockout_time: float = 0.3
+
+# ============================================================
+# State enum
+# ============================================================
 enum State {
-	Idle,
-	Walk,
-	Run,
-	Turn,
-	Skid,
-	Jump,
-	Fall,
-	Crouch,
-	Land,
-	DoubleJump,
-	WalkStart,
-	WalkEnd
+	Idle, Walk, Run, Turn, Skid, Jump, Fall, Crouch, Land, DoubleJump, WalkStart, WalkEnd
 }
 
 var current_state: State = State.Idle
 
-# Runtime movement state
+# ============================================================
+# Movement state
+# ============================================================
 var is_crouching: bool = false
 var was_crouching: bool = false
 var is_running: bool = false
@@ -94,10 +120,27 @@ var movement_lock_timer: float = 0.0
 var jump_cut_applied: bool = false
 var jump_active: bool = false
 
+# ============================================================
 # Animation state
+# ============================================================
 var crouch_reversing: bool = false
 var crouch_release_requested: bool = false
 var turn_animation_finished: bool = false
+var landing_squash_timer: float = 0.0
+
+# ============================================================
+# Wall state
+# ============================================================
+var is_on_wall: bool = false
+var wall_direction: int = 0
+var wall_contact_timer: float = 0.0
+var wall_jump_buffer: float = 0.0
+var wall_jump_lockout: float = 0.0
+
+# ============================================================
+# Rail state
+# ============================================================
+var is_on_rail: bool = false
 
 const STICK_NORMAL = preload("uid://d168j72ka1a35")
 const STICK_CROUCH = preload("uid://c5p4qg4p8701i")
@@ -120,18 +163,9 @@ func _ready() -> void:
 		)
 
 	if animated_sprite_2d != null and animated_sprite_2d.sprite_frames != null:
-		animated_sprite_2d.sprite_frames.set_animation_speed(
-			&"turn",
-			12.0
-		)
-		animated_sprite_2d.sprite_frames.set_animation_speed(
-			&"single_jump",
-			10.0
-		)
-		animated_sprite_2d.sprite_frames.set_animation_speed(
-			&"double_jump",
-			10.0
-		)
+		animated_sprite_2d.sprite_frames.set_animation_speed(&"turn", 12.0)
+		animated_sprite_2d.sprite_frames.set_animation_speed(&"single_jump", 10.0)
+		animated_sprite_2d.sprite_frames.set_animation_speed(&"double_jump", 10.0)
 
 	was_on_floor = is_on_floor()
 	update_hitbox()
@@ -139,22 +173,27 @@ func _ready() -> void:
 
 
 func _physics_process(delta: float) -> void:
+	if is_on_rail:
+		_handle_rail_input()
+		_finalize_frame()
+		return
+
 	turn_cooldown = max(turn_cooldown - delta, 0.0)
+
+	if landing_squash_timer > 0.0:
+		landing_squash_timer = max(landing_squash_timer - delta, 0.0)
 
 	if movement_locked:
 		_handle_movement_lock(delta)
 		return
 
 	_update_input_state(delta)
+	_check_wall_contact()
 	_handle_jump_input()
+	_handle_wall_jump_input()
 
 	if enable_variable_jump:
 		_handle_variable_jump()
-		
-	if jump_anticipation_timer > 0.0:
-		jump_anticipation_timer -= delta
-		if jump_anticipation_timer <= 0.0:
-			_start_jump(jump_force, true)
 
 	var previous_velocity_x: float = velocity.x
 
@@ -234,19 +273,10 @@ func _physics_process(delta: float) -> void:
 			else:
 				current_state = State.Idle
 	else:
-		# More forgiving air control while moving
-		if input_dir != 0.0:
-			velocity.x = move_toward(
-				previous_velocity_x,
-				input_dir * run_speed,
-				acceleration * delta * 0.85
-			)
-		else:
-			velocity.x = move_toward(
-				previous_velocity_x,
-				previous_velocity_x * 0.95,
-				deceleration * delta * 0.3
-			)
+		_apply_air_movement(delta, previous_velocity_x)
+
+	if is_on_wall:
+		_handle_wall_slide(delta)
 
 	_apply_gravity(delta)
 
@@ -274,12 +304,12 @@ func _update_input_state(delta: float) -> void:
 	was_crouching = is_crouching
 
 	input_dir = (
-		Input.get_action_strength(&"move_right")
-		- Input.get_action_strength(&"move_left")
+		Input.get_action_strength("player1_right")
+		- Input.get_action_strength("player1_left")
 	)
 
-	var crouch_input: bool = Input.is_action_pressed(&"move_down")
-	var run_input: bool = Input.is_action_pressed(&"sprint")
+	var crouch_input: bool = Input.is_action_pressed("player1_down")
+	var run_input: bool = Input.is_action_pressed("player1_sprint")
 
 	is_running = run_input and input_dir != 0.0
 	is_crouching = crouch_input and is_on_floor()
@@ -298,31 +328,26 @@ func _update_input_state(delta: float) -> void:
 	if not is_on_floor():
 		landing = false
 
+	if wall_jump_lockout > 0.0:
+		wall_jump_lockout = max(wall_jump_lockout - delta, 0.0)
+
 
 func _handle_jump_input() -> void:
-	var jump_pressed: bool = Input.is_action_just_pressed(&"move_up")
-	var jump_held: bool = Input.is_action_pressed(&"move_up")
+	var jump_pressed: bool = Input.is_action_just_pressed("player1_up")
+	var jump_held: bool = Input.is_action_pressed("player1_up")
 
 	if jump_pressed:
 		jump_buffer_timer = jump_buffer_time
 
-	if auto_jump and not jump_held:
-		jump_buffer_timer = 0.0
+	if auto_jump and jump_held and is_on_floor():
+		jump_buffer_timer = jump_buffer_time
 
-	var manual_jump_requested: bool = jump_buffer_timer > 0.0
-	var automatic_jump_requested: bool = (
-		auto_jump and jump_held and is_on_floor()
+	var can_jump: bool = (
+		coyote_timer > 0.0 and jump_buffer_timer > 0.0
 	)
 
-	if (
-		coyote_timer > 0.0
-		and (manual_jump_requested or automatic_jump_requested)
-	):
-		jump_buffer_timer = 0.0
-		coyote_timer = 0.0
-		air_jumps_used = 0
-		jump_anticipation_timer = jump_anticipation_time
-		current_state = State.Crouch
+	if can_jump:
+		_start_jump()
 		return
 
 	if (
@@ -334,17 +359,17 @@ func _handle_jump_input() -> void:
 		_start_double_jump()
 
 
-func _start_jump(force: float, allow_variable_cut: bool) -> void:
+func _start_jump() -> void:
 	var momentum_bonus: float = abs(velocity.x) * momentum_jump_boost
-	var boosted_force: float = min(force + momentum_bonus, force * momentum_max_boost)
+	var boosted_force: float = min(jump_force + momentum_bonus, jump_force * momentum_max_boost)
 
 	velocity.y = -boosted_force
-	jump_cut_applied = not allow_variable_cut
-	jump_active = allow_variable_cut
+	jump_buffer_timer = 0.0
+	coyote_timer = 0.0
+	air_jumps_used = 0
+	jump_active = true
+	jump_cut_applied = false
 	current_state = State.Jump
-
-	if animated_sprite_2d != null:
-		animated_sprite_2d.scale = Vector2(1.1, 0.9)
 
 	if gpu_particles_2d_x_tuning != null:
 		gpu_particles_2d_x_tuning.emitting = true
@@ -363,34 +388,47 @@ func _start_double_jump() -> void:
 
 
 func _handle_variable_jump() -> void:
-	if not jump_active:
-		return
-
-	if jump_cut_applied:
+	if not jump_active or jump_cut_applied:
 		return
 
 	if velocity.y >= 0.0:
 		jump_active = false
 		return
 
-	if not Input.is_action_pressed(&"move_up"):
+	if not Input.is_action_pressed("player1_up"):
 		velocity.y *= jump_cut_multiplier
 		jump_cut_applied = true
 
 
-func _apply_gravity(delta):
+func _apply_air_movement(delta: float, previous_velocity_x: float) -> void:
+	if input_dir != 0.0:
+		velocity.x = move_toward(
+			previous_velocity_x,
+			input_dir * max_air_speed,
+			air_acceleration * air_acceleration_multiplier * delta
+		)
+	else:
+		velocity.x = move_toward(
+			previous_velocity_x,
+			0.0,
+			air_deceleration * air_deceleration_multiplier * delta
+		)
+
+
+func _apply_gravity(delta: float) -> void:
 	if is_on_floor():
 		return
 
 	var g := gravity
 
-	# Hangtime near apex
-	if abs(velocity.y) < 60:
-		g *= 0.55
+	if abs(velocity.y) < apex_hang_threshold:
+		g *= apex_gravity_multiplier
+
+	if Input.is_action_pressed("player1_down") and velocity.y > 0.0:
+		g *= fast_fall_multiplier
 
 	velocity.y += g * delta
 	velocity.y = min(velocity.y, max_fall_speed)
-
 
 
 func _handle_movement_lock(delta: float) -> void:
@@ -426,10 +464,7 @@ func _start_turn_animation() -> void:
 		animated_sprite_2d.play(&"turn")
 
 
-func _apply_turn_movement(
-	delta: float,
-	previous_velocity_x: float
-) -> void:
+func _apply_turn_movement(delta: float, previous_velocity_x: float) -> void:
 	var turn_direction: float = float(last_dir)
 	var turn_target_speed: float = turn_direction * move_speed
 
@@ -484,11 +519,10 @@ func handle_landing() -> void:
 
 	was_on_floor = on_floor_now
 	update_hitbox()
-	if animated_sprite_2d:
-		animated_sprite_2d.scale = Vector2(1.15, 0.85)
-		await get_tree().create_timer(0.08).timeout
-		animated_sprite_2d.scale = Vector2(1.0, 1.0)
 
+	if animated_sprite_2d != null:
+		animated_sprite_2d.rotation = 0.0
+		landing_squash_timer = 0.0
 
 
 func start_respawn_lock(duration: float = 0.75) -> void:
@@ -591,16 +625,20 @@ func _finalize_frame() -> void:
 	_update_dust_particles()
 	update_animation()
 	_update_facing()
+
 	if abs(velocity.x) > 40:
 		animated_sprite_2d.rotation = deg_to_rad(velocity.x * 0.03)
 	else:
-		animated_sprite_2d.rotation = lerp(animated_sprite_2d.rotation, 0.0, 0.2)
-
+		if animated_sprite_2d != null:
+			animated_sprite_2d.rotation = lerp(animated_sprite_2d.rotation, 0.0, 0.2)
 
 
 func _update_dust_particles() -> void:
 	if gpu_particles_2d_x_tuning == null:
 		return
+
+	if _gpu_mat == null and gpu_particles_2d_x_tuning.process_material is ParticleProcessMaterial:
+		_gpu_mat = gpu_particles_2d_x_tuning.process_material as ParticleProcessMaterial
 
 	var should_emit: bool = (
 		is_on_floor()
@@ -633,6 +671,88 @@ func _update_dust_particles() -> void:
 
 	if _gpu_mat != null:
 		_gpu_mat.direction = Vector3(-facing_direction, 0.0, 0.0)
+
+
+func _check_wall_contact() -> void:
+	if wall_jump_lockout > 0.0:
+		is_on_wall = false
+		return
+
+	var space_state: PhysicsDirectSpaceState2D = get_world_2d().direct_space_state
+	var query: PhysicsShapeQueryParameters2D = PhysicsShapeQueryParameters2D.new()
+	query.shape = collision_shape_2d.shape
+	query.transform = global_transform
+	query.collide_with_areas = false
+	query.collide_with_bodies = true
+
+	var left_check: Transform2D = global_transform
+	left_check.origin.x -= 12.0
+	query.transform = left_check
+	var left_results: Array = space_state.intersect_shape(query)
+
+	var right_check: Transform2D = global_transform
+	right_check.origin.x += 12.0
+	query.transform = right_check
+	var right_results: Array = space_state.intersect_shape(query)
+
+	var was_on_wall: bool = is_on_wall
+	is_on_wall = false
+	wall_direction = 0
+
+	if left_results.size() > 0 and not is_on_floor() and velocity.y > 0.0:
+		is_on_wall = true
+		wall_direction = -1
+		wall_contact_timer += get_physics_process_delta_time()
+	elif right_results.size() > 0 and not is_on_floor() and velocity.y > 0.0:
+		is_on_wall = true
+		wall_direction = 1
+		wall_contact_timer += get_physics_process_delta_time()
+	else:
+		wall_contact_timer = 0.0
+
+	if was_on_wall and not is_on_wall:
+		wall_contact_timer = 0.0
+
+
+func _handle_wall_slide(delta: float) -> void:
+	if not is_on_wall:
+		return
+
+	var wall_gravity: float = gravity * wall_slide_gravity_multiplier
+	velocity.y += wall_gravity * delta
+	velocity.y = min(velocity.y, max_fall_speed * 0.6)
+
+
+func _handle_wall_jump_input() -> void:
+	if not is_on_wall or wall_contact_timer < min_wall_contact_time:
+		return
+
+	var jump_pressed: bool = Input.is_action_just_pressed("player1_up")
+
+	if jump_pressed:
+		wall_jump_buffer = wall_jump_buffer_time
+
+	wall_jump_buffer = max(wall_jump_buffer - get_physics_process_delta_time(), 0.0)
+
+	if wall_jump_buffer > 0.0:
+		_execute_wall_jump()
+		wall_jump_buffer = 0.0
+
+
+func _execute_wall_jump() -> void:
+	velocity.y = -wall_jump_force
+	velocity.x = wall_direction * wall_jump_horizontal_force
+
+	is_on_wall = false
+	wall_contact_timer = 0.0
+	wall_jump_lockout = wall_jump_lockout_time
+	jump_active = true
+	jump_cut_applied = false
+	current_state = State.Jump
+	air_jumps_used = 0
+
+	if gpu_particles_2d_x_tuning != null:
+		gpu_particles_2d_x_tuning.emitting = true
 
 
 func _on_animated_sprite_2d_animation_finished() -> void:
@@ -681,6 +801,38 @@ func _on_animated_sprite_2d_animation_finished() -> void:
 				current_state = State.Fall
 
 	update_animation()
+
+
+func set_on_rail(on_rail: bool) -> void:
+	is_on_rail = on_rail
+	
+	if on_rail:
+		velocity = Vector2.ZERO
+		current_state = State.Idle
+		air_jumps_used = 0
+		coyote_timer = 0.0
+	else:
+		pass
+
+
+func _handle_rail_input() -> void:
+	var jump_pressed: bool = Input.is_action_just_pressed("player1_up")
+	var down_pressed: bool = Input.is_action_pressed("player1_down")
+
+	var rail: Node = get_meta("rail_node") if has_meta("rail_node") else null
+
+	if rail == null:
+		return
+
+	if jump_pressed:
+		rail.stop_loop(self)
+		_start_jump()
+		return
+
+	if down_pressed:
+		rail.stop_loop(self)
+		velocity.y = 40.0
+		is_on_rail = false
 
 
 func _on_fall_death_area_body_entered(body: Node2D) -> void:
@@ -745,3 +897,7 @@ func _on_music_finished() -> void:
 
 	if music != null:
 		music.play()
+
+
+func _on_fall_death_area_body_exited(body: Node2D) -> void:
+	pass # Replace with function body.
