@@ -1,6 +1,6 @@
 [gd_scene format=3 uid="uid://cws1ithn2s6tq"]
 
-[ext_resource type="FontFile" uid="uid://c48jkx3ffe0m1" path="res://Silkscreen-Regular.ttf" id="1_nt2t8"]
+[ext_resource type="FontFile" uid="uid://c48jkx3ffe0m1" path="res://Fonts/Silkscreen-Regular.ttf" id="1_nt2t8"]
 
 [node name="CanvasLayer" type="CanvasLayer" unique_id=1816361871]
 

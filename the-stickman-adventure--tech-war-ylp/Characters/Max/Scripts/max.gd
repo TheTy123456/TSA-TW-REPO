@@ -10,8 +10,8 @@ var _gpu_mat: ParticleProcessMaterial = null
 # ============================================================
 # Movement tuning
 # ============================================================
-@export var move_speed: float = 220.0
-@export var run_speed: float = 340.0
+@export var move_speed: float = 180.0
+@export var run_speed: float = 270.0
 @export var crouch_speed: float = 70.0
 @export var acceleration: float = 2600.0
 @export var deceleration: float = 850.0
@@ -21,7 +21,7 @@ var _gpu_mat: ParticleProcessMaterial = null
 # ============================================================
 # Jump and gravity
 # ============================================================
-@export var jump_force: float = 480.0
+@export var jump_force: float = 390.0
 @export var gravity: float = 950.0
 @export var max_fall_speed: float = 1200.0
 @export var fast_fall_multiplier: float = 1.6
@@ -142,8 +142,8 @@ var wall_jump_lockout: float = 0.0
 # ============================================================
 var is_on_rail: bool = false
 
-const STICK_NORMAL = preload("uid://d168j72ka1a35")
-const STICK_CROUCH = preload("uid://c5p4qg4p8701i")
+const MAX_NORMAL = preload("res://Characters/Max/Hitboxes/max_normal.tres")
+const MAX_CROUCH = preload("res://Characters/Max/Hitboxes/max_crouch.tres")
 
 
 func _reset_jump_state() -> void:
@@ -304,12 +304,12 @@ func _update_input_state(delta: float) -> void:
 	was_crouching = is_crouching
 
 	input_dir = (
-		Input.get_action_strength("move_right")
-		- Input.get_action_strength("move_left")
+		Input.get_action_strength("player2_right")
+		- Input.get_action_strength("player2_left")
 	)
 
-	var crouch_input: bool = Input.is_action_pressed("move_down")
-	var run_input: bool = Input.is_action_pressed("sprint")
+	var crouch_input: bool = Input.is_action_pressed("player2_down")
+	var run_input: bool = Input.is_action_pressed("player2_sprint")
 
 	is_running = run_input and input_dir != 0.0
 	is_crouching = crouch_input and is_on_floor()
@@ -333,8 +333,8 @@ func _update_input_state(delta: float) -> void:
 
 
 func _handle_jump_input() -> void:
-	var jump_pressed: bool = Input.is_action_just_pressed("move_up")
-	var jump_held: bool = Input.is_action_pressed("move_up")
+	var jump_pressed: bool = Input.is_action_just_pressed("player2_up")
+	var jump_held: bool = Input.is_action_pressed("player2_up")
 
 	if jump_pressed:
 		jump_buffer_timer = jump_buffer_time
@@ -395,7 +395,7 @@ func _handle_variable_jump() -> void:
 		jump_active = false
 		return
 
-	if not Input.is_action_pressed("move_up"):
+	if not Input.is_action_pressed("player2_up"):
 		velocity.y *= jump_cut_multiplier
 		jump_cut_applied = true
 
@@ -424,7 +424,7 @@ func _apply_gravity(delta: float) -> void:
 	if abs(velocity.y) < apex_hang_threshold:
 		g *= apex_gravity_multiplier
 
-	if Input.is_action_pressed("move_down") and velocity.y > 0.0:
+	if Input.is_action_pressed("player2_down") and velocity.y > 0.0:
 		g *= fast_fall_multiplier
 
 	velocity.y += g * delta
@@ -553,11 +553,11 @@ func update_hitbox() -> void:
 		return
 
 	if is_crouching:
-		collision_shape_2d.shape = STICK_CROUCH
-		collision_shape_2d.position = Vector2(0, 6)
+		collision_shape_2d.shape = MAX_CROUCH
+		collision_shape_2d.position = Vector2(0, 9)
 	else:
-		collision_shape_2d.shape = STICK_NORMAL
-		collision_shape_2d.position = Vector2(0, 0)
+		collision_shape_2d.shape = MAX_NORMAL
+		collision_shape_2d.position = Vector2(0, 7)
 
 
 func update_animation() -> void:
@@ -727,7 +727,7 @@ func _handle_wall_jump_input() -> void:
 	if not is_on_wall or wall_contact_timer < min_wall_contact_time:
 		return
 
-	var jump_pressed: bool = Input.is_action_just_pressed("move_up")
+	var jump_pressed: bool = Input.is_action_just_pressed("player2_up")
 
 	if jump_pressed:
 		wall_jump_buffer = wall_jump_buffer_time
@@ -816,8 +816,8 @@ func set_on_rail(on_rail: bool) -> void:
 
 
 func _handle_rail_input() -> void:
-	var jump_pressed: bool = Input.is_action_just_pressed("move_up")
-	var down_pressed: bool = Input.is_action_pressed("move_down")
+	var jump_pressed: bool = Input.is_action_just_pressed("player2_up")
+	var down_pressed: bool = Input.is_action_pressed("player2_down")
 
 	var rail: Node = get_meta("rail_node") if has_meta("rail_node") else null
 
@@ -897,3 +897,7 @@ func _on_music_finished() -> void:
 
 	if music != null:
 		music.play()
+
+
+func _on_fall_death_area_body_exited(body: Node2D) -> void:
+	pass # Replace with function body.

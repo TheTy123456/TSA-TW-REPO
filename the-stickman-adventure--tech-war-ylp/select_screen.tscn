@@ -1,5 +1,10 @@
 [gd_scene format=3 uid="uid://cvqcgw5bq5608"]
 
+[ext_resource type="Texture2D" uid="uid://ds6ayq2ecwwy0" path="res://pixil-frame-0 (5).png" id="1_rjfr2"]
+[ext_resource type="Texture2D" uid="uid://p3c0mhe5sn8b" path="res://pixil-frame-0 (6).png" id="2_kaukx"]
+
+[sub_resource type="CanvasItemMaterial" id="CanvasItemMaterial_rrtyo"]
+
 [node name="Control" type="Control" unique_id=512855422]
 layout_mode = 3
 anchors_preset = 15
@@ -17,5 +22,25 @@ offset_bottom = 40.0
 [node name="HBoxContainer" type="HBoxContainer" parent="CanvasLayer/CenterContainer" unique_id=1405298241]
 layout_mode = 2
 
-[node name="VBoxContainer" type="VBoxContainer" parent="CanvasLayer/CenterContainer/HBoxContainer" unique_id=310178915]
+[node name="StickOption" type="VBoxContainer" parent="CanvasLayer/CenterContainer/HBoxContainer" unique_id=310178915]
 layout_mode = 2
+
+[node name="TextureRect" type="TextureRect" parent="CanvasLayer/CenterContainer/HBoxContainer/StickOption" unique_id=461122024]
+layout_mode = 2
+texture = ExtResource("1_rjfr2")
+
+[node name="TextureRect2" type="TextureRect" parent="CanvasLayer/CenterContainer/HBoxContainer/StickOption" unique_id=1832609235]
+material = SubResource("CanvasItemMaterial_rrtyo")
+layout_mode = 2
+texture = ExtResource("1_rjfr2")
+
+[node name="MaxOption" type="VBoxContainer" parent="CanvasLayer/CenterContainer/HBoxContainer" unique_id=1010541999]
+layout_mode = 2
+
+[node name="TextureRect" type="TextureRect" parent="CanvasLayer/CenterContainer/HBoxContainer/MaxOption" unique_id=377559026]
+layout_mode = 2
+texture = ExtResource("2_kaukx")
+
+[node name="TextureRect2" type="TextureRect" parent="CanvasLayer/CenterContainer/HBoxContainer/MaxOption" unique_id=1429261525]
+layout_mode = 2
+texture = ExtResource("1_rjfr2")

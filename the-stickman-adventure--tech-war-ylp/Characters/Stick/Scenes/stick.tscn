@@ -2,7 +2,7 @@
 
 [ext_resource type="Script" uid="uid://d1dmqvggw0k6n" path="res://Characters/Stick/Scripts/stick.gd" id="1_1hssm"]
 [ext_resource type="Texture2D" uid="uid://cs2e7mhwjt0t" path="res://Characters/Stick/Sprites/pixilart-sprite (1).png" id="2_m0jdc"]
-[ext_resource type="Shape2D" uid="uid://dedooowsgohgr" path="res://max_normal.tres" id="3_m0jdc"]
+[ext_resource type="Shape2D" uid="uid://dedooowsgohgr" path="res://Characters/Max/Hitboxes/max_normal.tres" id="3_m0jdc"]
 [ext_resource type="Texture2D" uid="uid://c7en7bqic4okl" path="res://Characters/Stick/pixil-frame-0 (2).png" id="4_m0jdc"]
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_qrqt6"]
@@ -308,11 +308,13 @@ point_count = 3
 [sub_resource type="CurveTexture" id="CurveTexture_8v6j0"]
 curve = SubResource("Curve_fck5u")
 
-[sub_resource type="ParticleProcessMaterial" id="ParticleProcessMaterial_rrtyo"]
+[sub_resource type="ParticleProcessMaterial" id="ParticleProcessMaterial_m0jdc"]
 lifetime_randomness = 0.21
 particle_flag_disable_z = true
 emission_shape = 3
 emission_box_extents = Vector3(1, 1, 1)
+angle_min = 80.000015
+angle_max = 80.000015
 direction = Vector3(0, -20, -3)
 initial_velocity_min = 20.0
 initial_velocity_max = 40.0
@@ -328,19 +330,18 @@ collision_layer = 2
 collision_mask = 3
 script = ExtResource("1_1hssm")
 auto_jump = true
+wall_jump_horizontal_force = 500.0
 
 [node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="." unique_id=129367735]
 sprite_frames = SubResource("SpriteFrames_j1cus")
-animation = &"crouch"
+animation = &"idle"
 autoplay = "idle"
-frame = 4
-frame_progress = 1.0
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="." unique_id=821858130]
 position = Vector2(0, 7)
 shape = ExtResource("3_m0jdc")
 
-[node name="GPUParticles2D" type="GPUParticles2D" parent="." unique_id=2075558593]
+[node name="Run_Turn_SlidParticles" type="GPUParticles2D" parent="." unique_id=2075558593]
 position = Vector2(-17, 23)
 emitting = false
 amount = 20
@@ -348,15 +349,14 @@ texture = ExtResource("4_m0jdc")
 one_shot = true
 explosiveness = 0.06
 randomness = 0.3
-process_material = SubResource("ParticleProcessMaterial_rrtyo")
+process_material = SubResource("ParticleProcessMaterial_m0jdc")
 
-[node name="GPUParticles2D2" type="GPUParticles2D" parent="." unique_id=1787896311]
-position = Vector2(0, 24)
-emitting = false
-amount = 5
-texture = ExtResource("4_m0jdc")
-one_shot = true
-randomness = 0.7
-process_material = SubResource("ParticleProcessMaterial_rrtyo")
+[node name="RayCast2D" type="RayCast2D" parent="." unique_id=316549221]
+position = Vector2(0, 2)
+target_position = Vector2(-16, 0)
+
+[node name="RayCast2D2" type="RayCast2D" parent="." unique_id=2065451519]
+position = Vector2(0, 2)
+target_position = Vector2(16, 0)
 
 [connection signal="animation_finished" from="AnimatedSprite2D" to="." method="_on_animated_sprite_2d_animation_finished"]

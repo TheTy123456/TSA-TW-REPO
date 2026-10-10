@@ -3,15 +3,16 @@ extends CharacterBody2D
 # Scene references
 @onready var animated_sprite_2d: AnimatedSprite2D = $AnimatedSprite2D
 @onready var collision_shape_2d: CollisionShape2D = $CollisionShape2D
-@onready var gpu_particles_2d_x_tuning: GPUParticles2D = $GPUParticles2D
+@onready var run_turn_slid_particles: GPUParticles2D = $Run_Turn_SlidParticles
+
 
 var _gpu_mat: ParticleProcessMaterial = null
 
 # ============================================================
 # Movement tuning
 # ============================================================
-@export var move_speed: float = 220.0
-@export var run_speed: float = 340.0
+@export var move_speed: float = 180.0
+@export var run_speed: float = 270.0
 @export var crouch_speed: float = 70.0
 @export var acceleration: float = 2600.0
 @export var deceleration: float = 850.0
@@ -21,7 +22,7 @@ var _gpu_mat: ParticleProcessMaterial = null
 # ============================================================
 # Jump and gravity
 # ============================================================
-@export var jump_force: float = 430.0
+@export var jump_force: float = 400.0
 @export var gravity: float = 950.0
 @export var max_fall_speed: float = 1200.0
 @export var fast_fall_multiplier: float = 1.6
@@ -75,7 +76,7 @@ var _gpu_mat: ParticleProcessMaterial = null
 @export var music_fade_duration: float = 0.5
 
 # ============================================================
-# Wall jump
+# Wall variables
 # ============================================================
 @export var wall_slide_gravity_multiplier: float = 0.4
 @export var wall_jump_force: float = 450.0
@@ -83,6 +84,10 @@ var _gpu_mat: ParticleProcessMaterial = null
 @export var wall_jump_buffer_time: float = 0.12
 @export var min_wall_contact_time: float = 0.1
 @export var wall_jump_lockout_time: float = 0.3
+@export var wall_climb_speed: float = 120.0
+@export var wall_slide_speed: float = 80.0
+var last_wall_direction: int = 0
+var is_climbing_wall: bool = false
 
 # ============================================================
 # State enum
@@ -153,12 +158,12 @@ func _reset_jump_state() -> void:
 
 func _ready() -> void:
 	if (
-		gpu_particles_2d_x_tuning != null
-		and gpu_particles_2d_x_tuning.process_material
+		run_turn_slid_particles != null
+		and run_turn_slid_particles.process_material
 		is ParticleProcessMaterial
 	):
 		_gpu_mat = (
-			gpu_particles_2d_x_tuning.process_material
+			run_turn_slid_particles.process_material
 			as ParticleProcessMaterial
 		)
 
@@ -276,7 +281,7 @@ func _physics_process(delta: float) -> void:
 		_apply_air_movement(delta, previous_velocity_x)
 
 	if is_on_wall:
-		_handle_wall_slide(delta)
+		_handle_wall_climb(delta)
 
 	_apply_gravity(delta)
 
@@ -371,8 +376,8 @@ func _start_jump() -> void:
 	jump_cut_applied = false
 	current_state = State.Jump
 
-	if gpu_particles_2d_x_tuning != null:
-		gpu_particles_2d_x_tuning.emitting = true
+	if run_turn_slid_particles != null:
+		run_turn_slid_particles.emitting = true
 
 
 func _start_double_jump() -> void:
@@ -401,6 +406,9 @@ func _handle_variable_jump() -> void:
 
 
 func _apply_air_movement(delta: float, previous_velocity_x: float) -> void:
+	if wall_jump_lockout > 0.0:
+		return
+	
 	if input_dir != 0.0:
 		velocity.x = move_toward(
 			previous_velocity_x,
@@ -416,6 +424,9 @@ func _apply_air_movement(delta: float, previous_velocity_x: float) -> void:
 
 
 func _apply_gravity(delta: float) -> void:
+	if is_climbing_wall:
+		return
+		
 	if is_on_floor():
 		return
 
@@ -494,8 +505,8 @@ func _apply_turn_movement(delta: float, previous_velocity_x: float) -> void:
 	):
 		animated_sprite_2d.play(&"turn")
 
-	if gpu_particles_2d_x_tuning != null:
-		gpu_particles_2d_x_tuning.emitting = true
+	if run_turn_slid_particles != null:
+		run_turn_slid_particles.emitting = true
 
 
 func _move_and_resolve_landing() -> void:
@@ -514,7 +525,7 @@ func handle_landing() -> void:
 				animated_sprite_2d.play(&"land")
 		else:
 			current_state = State.Walk
-
+			
 		_reset_jump_state()
 
 	was_on_floor = on_floor_now
@@ -542,8 +553,8 @@ func start_respawn_lock(duration: float = 0.75) -> void:
 	current_state = State.Idle
 	was_on_floor = is_on_floor()
 
-	if gpu_particles_2d_x_tuning != null:
-		gpu_particles_2d_x_tuning.emitting = false
+	if run_turn_slid_particles != null:
+		run_turn_slid_particles.emitting = false
 
 	update_animation()
 
@@ -634,11 +645,11 @@ func _finalize_frame() -> void:
 
 
 func _update_dust_particles() -> void:
-	if gpu_particles_2d_x_tuning == null:
+	if run_turn_slid_particles == null:
 		return
 
-	if _gpu_mat == null and gpu_particles_2d_x_tuning.process_material is ParticleProcessMaterial:
-		_gpu_mat = gpu_particles_2d_x_tuning.process_material as ParticleProcessMaterial
+	if _gpu_mat == null and run_turn_slid_particles.process_material is ParticleProcessMaterial:
+		_gpu_mat = run_turn_slid_particles.process_material as ParticleProcessMaterial
 
 	var should_emit: bool = (
 		is_on_floor()
@@ -649,10 +660,10 @@ func _update_dust_particles() -> void:
 		)
 	)
 
-	gpu_particles_2d_x_tuning.emitting = should_emit
+	run_turn_slid_particles.emitting = should_emit
 
 	if not should_emit:
-		gpu_particles_2d_x_tuning.position.x = 0.0
+		run_turn_slid_particles.position.x = 0.0
 		return
 
 	var facing_direction: float = float(last_dir)
@@ -661,11 +672,11 @@ func _update_dust_particles() -> void:
 		current_state == State.Skid
 		or current_state == State.Turn
 	):
-		gpu_particles_2d_x_tuning.position.x = (
+		run_turn_slid_particles.position.x = (
 			facing_direction * skid_particle_front_offset
 		)
 	else:
-		gpu_particles_2d_x_tuning.position.x = (
+		run_turn_slid_particles.position.x = (
 			facing_direction * normal_particle_offset
 		)
 
@@ -678,53 +689,53 @@ func _check_wall_contact() -> void:
 		is_on_wall = false
 		return
 
-	var space_state: PhysicsDirectSpaceState2D = get_world_2d().direct_space_state
-	var query: PhysicsShapeQueryParameters2D = PhysicsShapeQueryParameters2D.new()
+	# Save previous wall state
+	var was_on_wall: bool = is_on_wall
+
+	# Reset for new detection
+	is_on_wall = false
+	wall_direction = 0
+
+	# --- WALL CHECKS ---
+	var space_state = get_world_2d().direct_space_state
+	var query = PhysicsShapeQueryParameters2D.new()
 	query.shape = collision_shape_2d.shape
 	query.transform = global_transform
 	query.collide_with_areas = false
 	query.collide_with_bodies = true
 
-	var left_check: Transform2D = global_transform
+	var left_check = global_transform
 	left_check.origin.x -= 12.0
 	query.transform = left_check
-	var left_results: Array = space_state.intersect_shape(query)
+	var left_results = space_state.intersect_shape(query)
 
-	var right_check: Transform2D = global_transform
+	var right_check = global_transform
 	right_check.origin.x += 12.0
 	query.transform = right_check
-	var right_results: Array = space_state.intersect_shape(query)
-
-	var was_on_wall: bool = is_on_wall
-	is_on_wall = false
-	wall_direction = 0
-
-	if left_results.size() > 0 and not is_on_floor() and velocity.y > 0.0:
+	var right_results = space_state.intersect_shape(query)
+	
+	if left_results.size() > 0 and not is_on_floor():
 		is_on_wall = true
 		wall_direction = -1
 		wall_contact_timer += get_physics_process_delta_time()
-	elif right_results.size() > 0 and not is_on_floor() and velocity.y > 0.0:
+	elif right_results.size() > 0 and not is_on_floor():
 		is_on_wall = true
 		wall_direction = 1
 		wall_contact_timer += get_physics_process_delta_time()
 	else:
 		wall_contact_timer = 0.0
-
+	
 	if was_on_wall and not is_on_wall:
-		wall_contact_timer = 0.0
-
-
-func _handle_wall_slide(delta: float) -> void:
-	if not is_on_wall:
-		return
-
-	var wall_gravity: float = gravity * wall_slide_gravity_multiplier
-	velocity.y += wall_gravity * delta
-	velocity.y = min(velocity.y, max_fall_speed * 0.6)
+		last_wall_direction = 0
+		is_climbing_wall = false
 
 
 func _handle_wall_jump_input() -> void:
 	if not is_on_wall or wall_contact_timer < min_wall_contact_time:
+		return
+
+	# Prevent jumping on the same wall until player leaves it
+	if wall_direction == last_wall_direction:
 		return
 
 	var jump_pressed: bool = Input.is_action_just_pressed("player1_up")
@@ -737,22 +748,55 @@ func _handle_wall_jump_input() -> void:
 	if wall_jump_buffer > 0.0:
 		_execute_wall_jump()
 		wall_jump_buffer = 0.0
-
+		return
 
 func _execute_wall_jump() -> void:
 	velocity.y = -wall_jump_force
-	velocity.x = wall_direction * wall_jump_horizontal_force
+	velocity.x = -wall_direction * wall_jump_horizontal_force
+
+	last_wall_direction = wall_direction
 
 	is_on_wall = false
 	wall_contact_timer = 0.0
+
+	# Lock horizontal movement for a moment
 	wall_jump_lockout = wall_jump_lockout_time
+
 	jump_active = true
 	jump_cut_applied = false
 	current_state = State.Jump
-	air_jumps_used = 0
 
-	if gpu_particles_2d_x_tuning != null:
-		gpu_particles_2d_x_tuning.emitting = true
+	air_jumps_used = max_air_jumps
+	is_climbing_wall = false
+	
+	if run_turn_slid_particles != null:
+		run_turn_slid_particles.emitting = true
+
+
+func _handle_wall_climb(delta: float) -> void:
+	if not is_on_wall:
+		is_climbing_wall = false
+		return
+
+	var up := Input.is_action_pressed("player1_up")
+	var down := Input.is_action_pressed("player1_down")
+
+	# If player presses up → climb
+	if up:
+		is_climbing_wall = true
+		velocity.y = -wall_climb_speed
+		return
+
+	# If player presses down → climb downward
+	if down:
+		is_climbing_wall = true
+		velocity.y = wall_climb_speed
+		return
+
+	# If no input → stick to wall
+	is_climbing_wall = true
+	velocity.y = 0.0
+
 
 
 func _on_animated_sprite_2d_animation_finished() -> void:
