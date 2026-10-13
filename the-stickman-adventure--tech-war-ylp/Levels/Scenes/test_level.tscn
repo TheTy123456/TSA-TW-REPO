@@ -16,7 +16,6 @@
 [ext_resource type="AudioStream" uid="uid://cw2n4vacw2fnf" path="res://Main Audio/Level Music/8-1-27.mp3" id="9_kmo6j"]
 [ext_resource type="Texture2D" uid="uid://bdhotek3kcqn1" path="res://pixil-frame-2 (2).png" id="10_ynamt"]
 [ext_resource type="PackedScene" uid="uid://264iyoy0fql6" path="res://Characters/Max/Scenes/max.tscn" id="12_48mh7"]
-[ext_resource type="PackedScene" uid="uid://cf075045jgu74" path="res://ai_player.tscn" id="17_48mh7"]
 
 [sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_1c2mv"]
 texture = ExtResource("2_agw3v")
@@ -162,10 +161,6 @@ autoplay = true
 
 [node name="Transitions" parent="." unique_id=938060551 instance=ExtResource("5_kmo6j")]
 visible = false
-
-[node name="AiPlayer" parent="." unique_id=1605290556 node_paths=PackedStringArray("player") instance=ExtResource("17_48mh7")]
-position = Vector2(277, -37)
-player = NodePath("../Stick")
 
 [connection signal="body_entered" from="FallDeathArea" to="Stick" method="_on_fall_death_area_body_entered"]
 [connection signal="body_entered" from="FallDeathArea" to="Max" method="_on_fall_death_area_body_entered"]
