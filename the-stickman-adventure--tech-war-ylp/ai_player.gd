@@ -42,7 +42,7 @@ var movement_locked: bool = false
 var on_rail: bool = false
 
 # Player reference
-var player: CharacterBody2D = null
+@export var player: CharacterBody2D = null
 
 # Facing direction
 var facing_dir: int = 1
@@ -199,3 +199,7 @@ func respawn() -> void:
 	global_position = spawn_position
 	velocity = Vector2.ZERO
 	respawn_cooldown = 1.0
+
+
+func _on_animated_sprite_2d_animation_finished() -> void:
+	pass # Replace with function body.

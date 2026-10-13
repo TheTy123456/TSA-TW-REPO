@@ -4,6 +4,8 @@ extends CharacterBody2D
 @onready var animated_sprite_2d: AnimatedSprite2D = $AnimatedSprite2D
 @onready var collision_shape_2d: CollisionShape2D = $CollisionShape2D
 @onready var run_turn_slid_particles: GPUParticles2D = $Run_Turn_SlidParticles
+@onready var wall_check_left: RayCast2D = $WallCheckLeft
+@onready var wall_check_right: RayCast2D = $WallCheckRight
 
 
 var _gpu_mat: ParticleProcessMaterial = null
@@ -685,46 +687,33 @@ func _update_dust_particles() -> void:
 
 
 func _check_wall_contact() -> void:
+	var was_on_wall := is_on_wall
+	is_on_wall = false
+	wall_direction = 0
+
+	# --- RAYCAST WALL CHECK ---
+	var left_hit := wall_check_left.is_colliding()
+	var right_hit := wall_check_right.is_colliding()
+
+	if left_hit and not is_on_floor():
+		is_on_wall = true
+		wall_direction = -1
+	elif right_hit and not is_on_floor():
+		is_on_wall = true
+		wall_direction = 1
+
+	# --- WALL JUMP LOCKOUT ---
 	if wall_jump_lockout > 0.0:
 		is_on_wall = false
 		return
 
-	# Save previous wall state
-	var was_on_wall: bool = is_on_wall
-
-	# Reset for new detection
-	is_on_wall = false
-	wall_direction = 0
-
-	# --- WALL CHECKS ---
-	var space_state = get_world_2d().direct_space_state
-	var query = PhysicsShapeQueryParameters2D.new()
-	query.shape = collision_shape_2d.shape
-	query.transform = global_transform
-	query.collide_with_areas = false
-	query.collide_with_bodies = true
-
-	var left_check = global_transform
-	left_check.origin.x -= 12.0
-	query.transform = left_check
-	var left_results = space_state.intersect_shape(query)
-
-	var right_check = global_transform
-	right_check.origin.x += 12.0
-	query.transform = right_check
-	var right_results = space_state.intersect_shape(query)
-	
-	if left_results.size() > 0 and not is_on_floor():
-		is_on_wall = true
-		wall_direction = -1
-		wall_contact_timer += get_physics_process_delta_time()
-	elif right_results.size() > 0 and not is_on_floor():
-		is_on_wall = true
-		wall_direction = 1
+	# --- WALL CONTACT TIMER ---
+	if is_on_wall:
 		wall_contact_timer += get_physics_process_delta_time()
 	else:
 		wall_contact_timer = 0.0
-	
+
+	# --- WALL EXIT ---
 	if was_on_wall and not is_on_wall:
 		last_wall_direction = 0
 		is_climbing_wall = false
