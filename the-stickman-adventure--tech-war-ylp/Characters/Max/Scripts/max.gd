@@ -21,7 +21,7 @@ var _gpu_mat: ParticleProcessMaterial = null
 # ============================================================
 # Jump and gravity
 # ============================================================
-@export var jump_force: float = 390.0
+@export var jump_force: float = 430.0
 @export var gravity: float = 950.0
 @export var max_fall_speed: float = 1200.0
 @export var fast_fall_multiplier: float = 1.6

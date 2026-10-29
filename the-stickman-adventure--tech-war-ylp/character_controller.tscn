@@ -1,0 +1,144 @@
+[gd_scene format=3 uid="uid://bfi0vx2vjmuww"]
+
+[ext_resource type="Script" uid="uid://88rjnpu67nhk" path="res://select_screen.gd" id="1_s650c"]
+[ext_resource type="Texture2D" uid="uid://bdbr4w0jo6ax" path="res://pixil-layer-1.png" id="2_sxfhu"]
+[ext_resource type="Texture2D" uid="uid://brrdcg5nnmixo" path="res://pixil-layer-Layer 1 (2).png" id="3_hatql"]
+[ext_resource type="Texture2D" uid="uid://b8hx1qiw1wfe3" path="res://pixil-layer-Background (4).png" id="4_5ibcp"]
+[ext_resource type="FontFile" uid="uid://c48jkx3ffe0m1" path="res://Fonts/Silkscreen-Regular.ttf" id="5_c4kp8"]
+
+[node name="Character Controller" type="Control" unique_id=564810293]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 257.0
+offset_top = 124.0
+offset_right = 257.0
+offset_bottom = 124.0
+grow_horizontal = 2
+grow_vertical = 2
+scale = Vector2(4, 4)
+script = ExtResource("1_s650c")
+
+[node name="Single" type="Control" parent="." unique_id=1577906585]
+anchors_preset = 0
+offset_left = 70.0
+offset_top = 3.0
+offset_right = 110.0
+offset_bottom = 43.0
+
+[node name="Effect" type="TextureRect" parent="Single" unique_id=1256309110]
+layout_mode = 0
+offset_right = 40.0
+offset_bottom = 40.0
+texture = ExtResource("2_sxfhu")
+
+[node name="Portraits" type="TextureRect" parent="Single" unique_id=1833280280]
+layout_mode = 0
+offset_right = 40.0
+offset_bottom = 40.0
+texture = ExtResource("3_hatql")
+
+[node name="Banner" type="TextureRect" parent="Single" unique_id=419249056]
+layout_mode = 0
+offset_right = 40.0
+offset_bottom = 40.0
+texture = ExtResource("4_5ibcp")
+
+[node name="Label" type="Label" parent="Single" unique_id=64960476]
+layout_mode = 0
+offset_left = 49.0
+offset_top = 132.0
+offset_right = 166.0
+offset_bottom = 182.0
+theme_override_fonts/font = ExtResource("5_c4kp8")
+theme_override_font_sizes/font_size = 32
+text = "stick"
+
+[node name="Multi" type="Control" parent="." unique_id=572886517]
+anchors_preset = 0
+offset_left = 70.0
+offset_top = 3.0
+offset_right = 110.0
+offset_bottom = 43.0
+
+[node name="First Player" type="Control" parent="Multi" unique_id=184837318]
+anchors_preset = 0
+offset_left = -60.0
+offset_right = -20.0
+offset_bottom = 40.0
+
+[node name="Effect" type="TextureRect" parent="Multi/First Player" unique_id=1216225595]
+layout_mode = 0
+offset_right = 40.0
+offset_bottom = 40.0
+texture = ExtResource("2_sxfhu")
+
+[node name="Portraits" type="TextureRect" parent="Multi/First Player" unique_id=572924331]
+layout_mode = 0
+offset_right = 40.0
+offset_bottom = 40.0
+texture = ExtResource("3_hatql")
+
+[node name="Banner" type="TextureRect" parent="Multi/First Player" unique_id=1438804146]
+layout_mode = 0
+offset_right = 40.0
+offset_bottom = 40.0
+texture = ExtResource("4_5ibcp")
+
+[node name="Label" type="Label" parent="Multi/First Player" unique_id=2144236964]
+layout_mode = 0
+offset_left = 49.0
+offset_top = 132.0
+offset_right = 166.0
+offset_bottom = 182.0
+theme_override_fonts/font = ExtResource("5_c4kp8")
+theme_override_font_sizes/font_size = 32
+text = "stick"
+
+[node name="Second Player" type="Control" parent="Multi" unique_id=1094104664]
+anchors_preset = 0
+offset_left = 84.0
+offset_right = 124.0
+offset_bottom = 40.0
+
+[node name="Effect" type="TextureRect" parent="Multi/Second Player" unique_id=324957383]
+layout_mode = 0
+offset_right = 40.0
+offset_bottom = 40.0
+texture = ExtResource("2_sxfhu")
+
+[node name="Portraits" type="TextureRect" parent="Multi/Second Player" unique_id=595794042]
+layout_mode = 0
+offset_right = 40.0
+offset_bottom = 40.0
+texture = ExtResource("3_hatql")
+
+[node name="Banner" type="TextureRect" parent="Multi/Second Player" unique_id=1132920126]
+layout_mode = 0
+offset_right = 40.0
+offset_bottom = 40.0
+texture = ExtResource("4_5ibcp")
+
+[node name="Label" type="Label" parent="Multi/Second Player" unique_id=409107424]
+layout_mode = 0
+offset_left = 49.0
+offset_top = 132.0
+offset_right = 166.0
+offset_bottom = 182.0
+theme_override_fonts/font = ExtResource("5_c4kp8")
+theme_override_font_sizes/font_size = 32
+text = "stick"
+
+[node name="CanvasLayer" type="CanvasLayer" parent="." unique_id=508058188]
+
+[node name="Label" type="Label" parent="CanvasLayer" unique_id=413665901]
+offset_left = 538.0
+offset_top = 103.0
+offset_right = 753.0
+offset_bottom = 126.0
+scale = Vector2(4, 4)
+theme_override_fonts/font = ExtResource("5_c4kp8")
+theme_override_font_sizes/font_size = 14
+text = "choose your character!"
+clip_text = true

@@ -66,23 +66,24 @@ func _physics_process(delta: float) -> void:
 
 		var direction: float = rider_directions.get(rider, 1.0)
 		rider_follow.progress += loop_speed * delta * direction
-
+		
+		var offset := Vector2(0, rail_height_offset).rotated(rider_follow.global_rotation)
 		# Check if reached end of rail
 		if direction > 0 and rider_follow.progress >= curve_length:
 			rider_follow.progress = curve_length
-			rider.global_position = rider_follow.global_position + Vector2(0, rail_height_offset)
+			rider.global_position = rider_follow.global_position + offset
 			rider.global_rotation = rider_follow.global_rotation
 			riders_to_stop.append(rider)
 
 		elif direction < 0 and rider_follow.progress <= 0.0:
 			rider_follow.progress = 0.0
-			rider.global_position = rider_follow.global_position + Vector2(0, rail_height_offset)
+			rider.global_position = rider_follow.global_position + offset
 			rider.global_rotation = rider_follow.global_rotation
 			riders_to_stop.append(rider)
 
 		else:
 			# Keep player on rail with offset
-			rider.global_position = rider_follow.global_position + Vector2(0, rail_height_offset)
+			rider.global_position = rider_follow.global_position + offset
 			rider.global_rotation = rider_follow.global_rotation
 
 	for rider in riders_to_stop:
@@ -128,14 +129,16 @@ func start_loop(body: CharacterBody2D) -> void:
 		body.set_on_rail(true)
 
 	body.set_meta("rail_node", self)
-
+	
+	var offset := Vector2(0, rail_height_offset).rotated(rider_follow.global_rotation)
+	
 	# Position player on top of the rail
 	body.velocity = Vector2.ZERO
-	body.global_position = rider_follow.global_position + Vector2(0, rail_height_offset)
+	body.global_position = rider_follow.global_position + offset
 	body.global_rotation = rider_follow.global_rotation
 
 
-func stop_loop(body: CharacterBody2D) -> void:
+func stop_loop(body: CharacterBody2D, drop := false) -> void:
 	if body == null or body not in riders:
 		return
 
@@ -145,7 +148,8 @@ func stop_loop(body: CharacterBody2D) -> void:
 	var exit_rotation := body.global_rotation
 
 	if rider_follow != null:
-		exit_position = rider_follow.global_position + Vector2(0, rail_height_offset)
+		var offset := Vector2(0, rail_height_offset).rotated(rider_follow.global_rotation)
+		exit_position = rider_follow.global_position + offset
 		exit_rotation = rider_follow.global_rotation
 
 	riders.erase(body)
@@ -157,12 +161,15 @@ func stop_loop(body: CharacterBody2D) -> void:
 	if not is_instance_valid(body):
 		return
 
-	body.global_position = exit_position
-	body.global_rotation = 0.0
-
 	if body.has_method("set_on_rail"):
 		body.set_on_rail(false)
-
+	
+	body.set_meta("rail_node", null)
+	
+	if drop:
+		body.velocity = Vector2(0, 120)
+		return
+		
 	var exit_direction := Vector2.RIGHT.rotated(exit_rotation)
 	var current_direction: float = rider_directions.get(body, 1.0)
 

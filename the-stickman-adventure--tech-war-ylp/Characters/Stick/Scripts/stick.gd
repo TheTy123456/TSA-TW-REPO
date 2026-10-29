@@ -68,7 +68,8 @@ var _gpu_mat: ParticleProcessMaterial = null
 # Respawn
 # ============================================================
 @export var spawn_lock_duration: float = 0.75
-@export var respawn_position: Vector2 = Vector2.ZERO
+@export var player1_respawn_position: Vector2 = Vector2.ZERO
+@export var player2_respawn_position: Vector2 = Vector2.ZERO
 @export var rail_height_offset := -20.0
 
 # ============================================================
@@ -126,6 +127,8 @@ var movement_lock_timer: float = 0.0
 
 var jump_cut_applied: bool = false
 var jump_active: bool = false
+var jump_anim_hold := 0.1
+
 
 # ============================================================
 # Animation state
@@ -149,6 +152,9 @@ var wall_jump_lockout: float = 0.0
 # ============================================================
 var is_on_rail: bool = false
 
+var idle_timer := 0.0
+var idle_variant_playing := false
+
 const STICK_NORMAL = preload("uid://d168j72ka1a35")
 const STICK_CROUCH = preload("uid://c5p4qg4p8701i")
 
@@ -171,7 +177,7 @@ func _ready() -> void:
 
 	if animated_sprite_2d != null and animated_sprite_2d.sprite_frames != null:
 		animated_sprite_2d.sprite_frames.set_animation_speed(&"turn", 12.0)
-		animated_sprite_2d.sprite_frames.set_animation_speed(&"single_jump", 10.0)
+		animated_sprite_2d.sprite_frames.set_animation_speed(&"single_jump", 6.0)
 		animated_sprite_2d.sprite_frames.set_animation_speed(&"double_jump", 10.0)
 
 	was_on_floor = is_on_floor()
@@ -181,10 +187,25 @@ func _ready() -> void:
 
 func _physics_process(delta: float) -> void:
 	if is_on_rail:
+		var rail = get_meta("rail_node")
+		if rail:
+			var rider_follow = rail.rider_follows.get(self)
+			if rider_follow:
+				global_position = rider_follow.global_position
+				
+				global_rotation = 0.0
+				animated_sprite_2d.rotation = 0.0
+				collision_shape_2d.rotation = 0.0
+			
 		_handle_rail_input()
-		_finalize_frame()
-		return
 
+		
+	if current_state == State.Idle:
+		idle_timer += delta
+	else:
+		idle_timer = 0.0
+		idle_variant_playing = false
+	
 	turn_cooldown = max(turn_cooldown - delta, 0.0)
 
 	if landing_squash_timer > 0.0:
@@ -291,7 +312,8 @@ func _physics_process(delta: float) -> void:
 		if current_state == State.DoubleJump:
 			pass
 		elif current_state == State.Jump:
-			if velocity.y >= 0.0:
+			jump_anim_hold -= delta
+			if jump_anim_hold <= 0.0 and velocity.y >= 0.0:
 				current_state = State.Fall
 		elif velocity.y < 0.0:
 			current_state = State.Jump
@@ -371,6 +393,7 @@ func _start_jump() -> void:
 	var boosted_force: float = min(jump_force + momentum_bonus, jump_force * momentum_max_boost)
 
 	velocity.y = -boosted_force
+	jump_anim_hold = 0.1
 	jump_buffer_timer = 0.0
 	coyote_timer = 0.0
 	air_jumps_used = 0
@@ -591,7 +614,23 @@ func update_animation() -> void:
 
 	match current_state:
 		State.Idle:
+	# If a variant is already playing, don't interrupt it
+			if idle_variant_playing:
+				return
+				
+			if idle_timer > 10.0:
+				var r = randf()
+				if r < 0.5:
+					animated_sprite_2d.play(&"idle 2")
+				else:
+					animated_sprite_2d.play(&"idle 3")
+					
+				idle_variant_playing = true
+				idle_timer = 0.0
+				return
+				
 			animation_name = &"idle"
+
 		State.Walk:
 			animation_name = &"walk"
 		State.Run:
@@ -615,8 +654,10 @@ func update_animation() -> void:
 		State.WalkEnd:
 			animation_name = &"end walk"
 
-	if current_state == State.DoubleJump:
-		if animated_sprite_2d.animation != &"double_jump":
+	if current_state == State.Jump or current_state == State.DoubleJump:
+		if animated_sprite_2d.animation != &"single_jump" and current_state == State.Jump:
+			animated_sprite_2d.play(&"single_jump")
+		if animated_sprite_2d.animation != &"double_jump" and current_state == State.DoubleJump:
 			animated_sprite_2d.play(&"double_jump")
 		_update_facing()
 		return
@@ -638,6 +679,9 @@ func _finalize_frame() -> void:
 	_update_dust_particles()
 	update_animation()
 	_update_facing()
+	if not is_on_rail:
+		collision_shape_2d.rotation = animated_sprite_2d.rotation
+
 
 	if abs(velocity.x) > 40:
 		animated_sprite_2d.rotation = deg_to_rad(velocity.x * 0.03)
@@ -762,7 +806,7 @@ func _execute_wall_jump() -> void:
 		run_turn_slid_particles.emitting = true
 
 
-func _handle_wall_climb(delta: float) -> void:
+func _handle_wall_climb(_delta: float) -> void:
 	if not is_on_wall:
 		is_climbing_wall = false
 		return
@@ -789,19 +833,31 @@ func _handle_wall_climb(delta: float) -> void:
 
 
 func _on_animated_sprite_2d_animation_finished() -> void:
+	if animated_sprite_2d.animation == &"idle 2" or animated_sprite_2d.animation == &"idle 3":
+		idle_variant_playing = false
+		animated_sprite_2d.play(&"idle")
+		return
+		
 	if crouch_reversing:
 		crouch_reversing = false
-
+		
 		if is_crouching:
 			current_state = State.Crouch
 		elif abs(input_dir) > 0.0:
 			current_state = State.Walk
 		else:
 			current_state = State.Idle
-
+			
 		update_animation()
 		return
-
+		
+	if is_crouching:
+		current_state = State.Crouch
+	elif abs(input_dir) > 0.0:
+		current_state = State.Walk
+	else:
+		current_state = State.Idle
+		
 	match animated_sprite_2d.animation:
 		&"start walk":
 			if is_running and input_dir != 0.0:
@@ -832,7 +888,7 @@ func _on_animated_sprite_2d_animation_finished() -> void:
 				current_state = State.Jump
 			else:
 				current_state = State.Fall
-
+				
 	update_animation()
 
 
@@ -858,14 +914,10 @@ func _handle_rail_input() -> void:
 		return
 
 	if jump_pressed:
-		rail.stop_loop(self)
-		_start_jump()
-		return
+		rail.stop_loop(self, false)
 
 	if down_pressed:
-		rail.stop_loop(self)
-		velocity.y = 40.0
-		is_on_rail = false
+		rail.stop_loop(self, true)
 
 
 func _on_fall_death_area_body_entered(body: Node2D) -> void:
@@ -899,7 +951,7 @@ func _on_fall_death_area_body_entered(body: Node2D) -> void:
 
 	await get_tree().create_timer(0.5).timeout
 
-	global_position = respawn_position
+	global_position = player1_respawn_position
 	velocity = Vector2.ZERO
 	last_dir = 1
 	if animated_sprite_2d != null:
@@ -932,5 +984,5 @@ func _on_music_finished() -> void:
 		music.play()
 
 
-func _on_fall_death_area_body_exited(body: Node2D) -> void:
+func _on_fall_death_area_body_exited(_body: Node2D) -> void:
 	pass # Replace with function body.

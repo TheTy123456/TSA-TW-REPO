@@ -30,11 +30,11 @@ func _ready() -> void:
 	cutscene_player.play(&"cutscene")
 
 	await get_tree().process_frame
+	transitions.play_circle_fade_out()
 
 	cutscene_ready = true
 
-	# Reveal the cutscene.
-	transitions.play_circle_fade_out()
+	# Reveal makes the cutscene.
 
 
 func _on_viewport_size_changed() -> void:

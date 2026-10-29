@@ -57,6 +57,54 @@ region = Rect2(400, 0, 200, 200)
 atlas = ExtResource("2_m0jdc")
 region = Rect2(600, 0, 200, 200)
 
+[sub_resource type="AtlasTexture" id="AtlasTexture_1udt1"]
+atlas = ExtResource("2_m0jdc")
+region = Rect2(800, 0, 200, 200)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_jkwmj"]
+atlas = ExtResource("2_m0jdc")
+region = Rect2(1000, 0, 200, 200)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_uklvf"]
+atlas = ExtResource("2_m0jdc")
+region = Rect2(1200, 0, 200, 200)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_g4do5"]
+atlas = ExtResource("2_m0jdc")
+region = Rect2(1400, 0, 200, 200)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_yac3r"]
+atlas = ExtResource("2_m0jdc")
+region = Rect2(1600, 0, 200, 200)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_40u5t"]
+atlas = ExtResource("2_m0jdc")
+region = Rect2(1800, 0, 200, 200)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_leprv"]
+atlas = ExtResource("2_m0jdc")
+region = Rect2(2000, 0, 200, 200)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_whsbc"]
+atlas = ExtResource("2_m0jdc")
+region = Rect2(2200, 0, 200, 200)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_qce0b"]
+atlas = ExtResource("2_m0jdc")
+region = Rect2(2400, 0, 200, 200)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_sqf6d"]
+atlas = ExtResource("2_m0jdc")
+region = Rect2(2600, 0, 200, 200)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_4eobd"]
+atlas = ExtResource("2_m0jdc")
+region = Rect2(2800, 0, 200, 200)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_vyclj"]
+atlas = ExtResource("2_m0jdc")
+region = Rect2(3000, 0, 200, 200)
+
 [sub_resource type="AtlasTexture" id="AtlasTexture_hu5ya"]
 atlas = ExtResource("2_m0jdc")
 region = Rect2(5400, 0, 200, 200)
@@ -200,6 +248,82 @@ animations = [{
 "speed": 12.0
 }, {
 "frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_1udt1")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_jkwmj")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_uklvf")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_g4do5")
+}, {
+"duration": 5.0,
+"texture": SubResource("AtlasTexture_yac3r")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_40u5t")
+}, {
+"duration": 5.0,
+"texture": SubResource("AtlasTexture_yac3r")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_g4do5")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_uklvf")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_jkwmj")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_1udt1")
+}],
+"loop": 0,
+"name": &"idle 2",
+"speed": 12.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_leprv")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_whsbc")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_qce0b")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_sqf6d")
+}, {
+"duration": 5.0,
+"texture": SubResource("AtlasTexture_4eobd")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_vyclj")
+}, {
+"duration": 5.0,
+"texture": SubResource("AtlasTexture_4eobd")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_sqf6d")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_qce0b")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_whsbc")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_leprv")
+}],
+"loop": 0,
+"name": &"idle 3",
+"speed": 10.0
+}, {
+"frames": [{
 "duration": 2.0,
 "texture": SubResource("AtlasTexture_hu5ya")
 }, {
@@ -231,7 +355,7 @@ animations = [{
 "speed": 12.0
 }, {
 "frames": [{
-"duration": 1.0,
+"duration": 10.0,
 "texture": SubResource("AtlasTexture_salup")
 }],
 "loop": 0,
@@ -330,11 +454,12 @@ collision_layer = 2
 collision_mask = 3
 script = ExtResource("1_1hssm")
 auto_jump = true
+rail_height_offset = -40.0
 wall_jump_horizontal_force = 500.0
 
 [node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="." unique_id=129367735]
 sprite_frames = SubResource("SpriteFrames_j1cus")
-animation = &"idle"
+animation = &"single_jump"
 autoplay = "idle"
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="." unique_id=821858130]

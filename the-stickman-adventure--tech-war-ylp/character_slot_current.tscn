@@ -1,0 +1,26 @@
+[gd_scene format=3 uid="uid://dmk1p41b0fdr6"]
+
+[ext_resource type="PackedScene" uid="uid://bqihgyq4y13k4" path="res://character_slot.tscn" id="1_ruc87"]
+
+[node name="CharacterSlotCurrent" type="Control" unique_id=497691425]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="Player1Slot" parent="." unique_id=512855422 instance=ExtResource("1_ruc87")]
+layout_mode = 1
+offset_left = -1214.0
+offset_right = -1018.0
+
+[node name="Player2Slot" parent="." unique_id=1189394487 instance=ExtResource("1_ruc87")]
+layout_mode = 1
+offset_left = -35.99994
+offset_top = -506.0
+offset_right = 160.0
+offset_bottom = -311.0
+
+[editable path="Player1Slot"]
+[editable path="Player2Slot"]
