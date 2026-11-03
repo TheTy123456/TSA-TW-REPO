@@ -151,6 +151,7 @@ script = ExtResource("2_yqpmr")
 material = SubResource("ShaderMaterial_yqpmr")
 offset_right = 1932.0
 offset_bottom = 1083.0
+mouse_filter = 2
 color = Color(0, 0, 0, 1)
 
 [node name="CircleTrans" type="ColorRect" parent="." unique_id=2036349607]
@@ -166,6 +167,7 @@ offset_right = 13117.0
 offset_bottom = 3415.0
 grow_horizontal = 0
 grow_vertical = 0
+mouse_filter = 2
 color = Color(0, 0, 0, 1)
 
 [node name="AnimationPlayer" type="AnimationPlayer" parent="." unique_id=1505348164]

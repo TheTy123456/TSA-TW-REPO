@@ -1,0 +1,214 @@
+[gd_scene format=3 uid="uid://dq2epjnhlv218"]
+
+[ext_resource type="Texture2D" uid="uid://ckd4yxfel7opl" path="res://pixil-frame-0 (13).png" id="1_j5v2v"]
+[ext_resource type="Texture2D" uid="uid://biuhxd0eptfry" path="res://pixil-frame-0 (10).png" id="1_jix8l"]
+[ext_resource type="Script" uid="uid://dvhl1kjkkqpas" path="res://main_menu.gd" id="1_nlkkf"]
+[ext_resource type="Script" uid="uid://bpih0g82olhx5" path="res://story_button.gd" id="2_glbon"]
+[ext_resource type="Script" uid="uid://b5dgvkf4yu0pb" path="res://texture_rect_2.gd" id="2_iotk1"]
+[ext_resource type="Texture2D" uid="uid://ce8poytjypby6" path="res://pixil-frame-0 (12).png" id="3_glbon"]
+[ext_resource type="Texture2D" uid="uid://cv3rrlryrxxy" path="res://pixil-frame-0 (11).png" id="4_nlkkf"]
+[ext_resource type="Texture2D" uid="uid://xukmjj5iowsf" path="res://pixil-frame-0 (8).png" id="4_qe12f"]
+[ext_resource type="Texture2D" uid="uid://dd1fxrv5hm1xy" path="res://pixil-frame-0 (16).png" id="6_e5qqf"]
+[ext_resource type="Texture2D" uid="uid://r3jue8kofril" path="res://pixil-frame-0 (17).png" id="7_7bbuq"]
+[ext_resource type="Texture2D" uid="uid://cqbpg7khemrqd" path="res://pixil-frame-1.png" id="8_dy7ct"]
+[ext_resource type="Script" uid="uid://decuycivqj2u2" path="res://ball.gd" id="8_j5v2v"]
+[ext_resource type="Texture2D" uid="uid://cifc2mnrqggvo" path="res://pixil-frame-0 (18).png" id="8_saq78"]
+[ext_resource type="Texture2D" uid="uid://du1aqwueklrmc" path="res://pixil-frame-0 (19).png" id="9_8uw0o"]
+[ext_resource type="Texture2D" uid="uid://dhqfj8sv7ikth" path="res://pixil-frame-0.png" id="10_j5v2v"]
+[ext_resource type="Texture2D" uid="uid://bsy34j44xiarp" path="res://pixil-frame-3.png" id="11_iotk1"]
+[ext_resource type="Texture2D" uid="uid://u431x42xa6jn" path="res://pixil-frame-2.png" id="12_w44g7"]
+[ext_resource type="Texture2D" uid="uid://bb827yymlhvox" path="res://costume1 (1).png" id="14_w44g7"]
+[ext_resource type="Script" uid="uid://gbb3v3041qht" path="res://texture_rect.gd" id="15_8u0te"]
+[ext_resource type="AudioStream" uid="uid://c7kv00wn2f8j3" path="res://16 Super Sonic Racing (Instrumental).mp3" id="15_cm266"]
+[ext_resource type="PackedScene" uid="uid://d1aqq35qid7gv" path="res://UI Mechanics/Transitions/Scenes/circle_transition.tscn" id="16_g8g3n"]
+
+[sub_resource type="CapsuleShape2D" id="CapsuleShape2D_rrtyo"]
+radius = 24.0
+height = 52.0
+
+[node name="Main Menu" type="Control" unique_id=1722066389]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 57.0
+offset_top = 85.0
+offset_right = -1585.0
+offset_bottom = -724.0
+grow_horizontal = 2
+grow_vertical = 2
+offset_transform_enabled = true
+script = ExtResource("1_nlkkf")
+
+[node name="TextureRect2" type="TextureRect" parent="." unique_id=110171614]
+layout_mode = 0
+offset_left = -75.0
+offset_top = -93.0
+offset_right = 1874.0
+offset_bottom = 1023.0
+offset_transform_enabled = true
+offset_transform_scale = Vector2(1.5, 1.5)
+texture = ExtResource("1_j5v2v")
+script = ExtResource("2_iotk1")
+
+[node name="Balls" type="Node2D" parent="." unique_id=595116443]
+
+[node name="Ball" type="Area2D" parent="Balls" unique_id=59257799 groups=["balls"]]
+script = ExtResource("8_j5v2v")
+
+[node name="Sprite2D" type="Sprite2D" parent="Balls/Ball" unique_id=1344180089]
+texture = ExtResource("8_dy7ct")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Balls/Ball" unique_id=335641871]
+position = Vector2(-2, 0)
+shape = SubResource("CapsuleShape2D_rrtyo")
+
+[node name="Ball5" type="Area2D" parent="Balls" unique_id=941731277 groups=["balls"]]
+position = Vector2(-13, 444)
+script = ExtResource("8_j5v2v")
+
+[node name="Sprite2D" type="Sprite2D" parent="Balls/Ball5" unique_id=703667866]
+texture = ExtResource("6_e5qqf")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Balls/Ball5" unique_id=1237098840]
+position = Vector2(-2, 0)
+shape = SubResource("CapsuleShape2D_rrtyo")
+
+[node name="Ball6" type="Area2D" parent="Balls" unique_id=1290665602 groups=["balls"]]
+position = Vector2(879, 935)
+script = ExtResource("8_j5v2v")
+
+[node name="Sprite2D" type="Sprite2D" parent="Balls/Ball6" unique_id=995357719]
+texture = ExtResource("7_7bbuq")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Balls/Ball6" unique_id=1656233121]
+position = Vector2(-2, 0)
+shape = SubResource("CapsuleShape2D_rrtyo")
+
+[node name="Ball7" type="Area2D" parent="Balls" unique_id=688510357 groups=["balls"]]
+position = Vector2(1788, 481)
+script = ExtResource("8_j5v2v")
+
+[node name="Sprite2D" type="Sprite2D" parent="Balls/Ball7" unique_id=1076228372]
+texture = ExtResource("8_saq78")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Balls/Ball7" unique_id=372436883]
+position = Vector2(-2, 0)
+shape = SubResource("CapsuleShape2D_rrtyo")
+
+[node name="Ball8" type="Area2D" parent="Balls" unique_id=39222162 groups=["balls"]]
+position = Vector2(868, 14)
+script = ExtResource("8_j5v2v")
+
+[node name="Sprite2D" type="Sprite2D" parent="Balls/Ball8" unique_id=993502674]
+texture = ExtResource("9_8uw0o")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Balls/Ball8" unique_id=1341633132]
+position = Vector2(-2, 0)
+shape = SubResource("CapsuleShape2D_rrtyo")
+
+[node name="Ball2" type="Area2D" parent="Balls" unique_id=2003632696 groups=["balls"]]
+position = Vector2(1774, 10)
+script = ExtResource("8_j5v2v")
+
+[node name="Sprite2D" type="Sprite2D" parent="Balls/Ball2" unique_id=1155067319]
+texture = ExtResource("10_j5v2v")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Balls/Ball2" unique_id=1554035102]
+position = Vector2(-2, 0)
+shape = SubResource("CapsuleShape2D_rrtyo")
+
+[node name="Ball3" type="Area2D" parent="Balls" unique_id=958008852 groups=["balls"]]
+position = Vector2(-10, 944)
+script = ExtResource("8_j5v2v")
+
+[node name="Sprite2D" type="Sprite2D" parent="Balls/Ball3" unique_id=1121603762]
+texture = ExtResource("11_iotk1")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Balls/Ball3" unique_id=1960177166]
+position = Vector2(-2, 0)
+shape = SubResource("CapsuleShape2D_rrtyo")
+
+[node name="Ball4" type="Area2D" parent="Balls" unique_id=1930956042 groups=["balls"]]
+position = Vector2(1765, 935)
+script = ExtResource("8_j5v2v")
+
+[node name="Sprite2D" type="Sprite2D" parent="Balls/Ball4" unique_id=1531251551]
+texture = ExtResource("12_w44g7")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Balls/Ball4" unique_id=760391436]
+position = Vector2(-2, 3)
+shape = SubResource("CapsuleShape2D_rrtyo")
+
+[node name="StoryButton" type="TextureButton" parent="." unique_id=1358695609]
+layout_mode = 1
+anchors_preset = -1
+anchor_left = -0.046000004
+anchor_top = 0.053000003
+anchor_right = 0.043
+anchor_bottom = 0.33600003
+offset_left = -235.212
+offset_top = 290.637
+offset_right = 927.046
+offset_bottom = 413.944
+offset_transform_enabled = true
+offset_transform_position = Vector2(2500, 150)
+offset_transform_scale = Vector2(5, 5)
+texture_normal = ExtResource("1_jix8l")
+script = ExtResource("2_glbon")
+
+[node name="SettingsButton" type="TextureButton" parent="." unique_id=1850400892]
+layout_mode = 1
+anchors_preset = -1
+anchor_left = -0.046000004
+anchor_top = 0.053000003
+anchor_right = 0.043
+anchor_bottom = 0.33600003
+offset_left = -235.212
+offset_top = 523.637
+offset_right = 927.046
+offset_bottom = 646.944
+offset_transform_enabled = true
+offset_transform_position = Vector2(2500, 150)
+offset_transform_scale = Vector2(5, 5)
+texture_normal = ExtResource("3_glbon")
+script = ExtResource("2_glbon")
+
+[node name="BackButton3" type="TextureButton" parent="." unique_id=655479112]
+layout_mode = 1
+anchors_preset = -1
+anchor_left = -0.046000004
+anchor_top = 0.053000003
+anchor_right = 0.043
+anchor_bottom = 0.33600003
+offset_left = -235.212
+offset_top = 755.637
+offset_right = 927.046
+offset_bottom = 878.944
+offset_transform_enabled = true
+offset_transform_position = Vector2(2500, 150)
+offset_transform_scale = Vector2(5, 5)
+texture_normal = ExtResource("4_nlkkf")
+script = ExtResource("2_glbon")
+
+[node name="Sprite2D" type="Sprite2D" parent="." unique_id=1193008427]
+position = Vector2(910.49994, 460.50003)
+scale = Vector2(2.0385416, 1.551389)
+texture = ExtResource("14_w44g7")
+
+[node name="TextureRect" type="TextureRect" parent="." unique_id=555540087]
+layout_mode = 0
+offset_left = 239.0
+offset_top = -25.0
+offset_right = 719.0
+offset_bottom = 113.0
+offset_transform_enabled = true
+offset_transform_scale = Vector2(4, 4)
+texture = ExtResource("4_qe12f")
+script = ExtResource("15_8u0te")
+
+[node name="AudioStreamPlayer" type="AudioStreamPlayer" parent="." unique_id=1322060004]
+stream = ExtResource("15_cm266")
+autoplay = true
+
+[node name="Transitions" parent="." unique_id=1135095852 instance=ExtResource("16_g8g3n")]
