@@ -9,11 +9,12 @@ extends Camera2D
 
 var look_dir := 0.0
 
-func _process(delta: float) -> void:
+func _ready() -> void:
 	print("Camera script loaded on node:", name)
 	print("Node type is Camera2D? ->", self is Camera2D)
 	print("Attached script file ->", get_script())
-
+	
+func _process(delta: float) -> void:
 	if GameState.game_mode == "single":
 		follow_single(delta)
 	else:

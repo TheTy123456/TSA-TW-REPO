@@ -14,6 +14,7 @@
 [ext_resource type="PackedScene" uid="uid://ccjbpwt4m3p1g" path="res://Mechanics/Rails/Scenes/rail_2_test_level.tscn" id="8_wtpou"]
 [ext_resource type="AudioStream" uid="uid://cw2n4vacw2fnf" path="res://Main Audio/Level Music/8-1-27.mp3" id="9_kmo6j"]
 [ext_resource type="Texture2D" uid="uid://bdhotek3kcqn1" path="res://pixil-frame-2 (2).png" id="10_ynamt"]
+[ext_resource type="PackedScene" uid="uid://cf075045jgu74" path="res://ai_player.tscn" id="15_22jbo"]
 
 [sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_1c2mv"]
 texture = ExtResource("2_agw3v")
@@ -48,20 +49,13 @@ sources/0 = SubResource("TileSetAtlasSource_1c2mv")
 sources/2 = SubResource("TileSetAtlasSource_xt2rf")
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_rrtyo"]
-size = Vector2(5723, 522)
+size = Vector2(6606, 117.5)
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_wtpou"]
 size = Vector2(26685, 4439)
 
 [node name="Test Level" type="Node2D" unique_id=1431873934]
 script = ExtResource("1_swfa6")
-
-[node name="ColorRect" type="ColorRect" parent="." unique_id=1352736721]
-offset_left = -3033.0
-offset_top = -676.0
-offset_right = 2828.0
-offset_bottom = 1139.0
-color = Color(0.7375906, 0.92737657, 0.9999997, 1)
 
 [node name="ParallaxBackground" type="Parallax2D" parent="." unique_id=1368556456]
 scroll_offset = Vector2(530, 535)
@@ -72,7 +66,20 @@ scroll_offset = Vector2(0, -133)
 repeat_size = Vector2(200, 0)
 repeat_times = 52
 
-[node name="Sprite2D" type="Sprite2D" parent="ParallaxBackground/Parallax2D3" unique_id=611082598]
+[node name="ColorRect" type="ColorRect" parent="ParallaxBackground/Parallax2D3" unique_id=1352736721]
+offset_left = -3563.0
+offset_top = -1078.0
+offset_right = 2298.0
+offset_bottom = 737.0
+color = Color(0.7375906, 0.92737657, 0.9999997, 1)
+
+[node name="Parallax2D5" type="Parallax2D" parent="ParallaxBackground" unique_id=1390006187]
+scroll_scale = Vector2(0.1, 0.1)
+scroll_offset = Vector2(0, -133)
+repeat_size = Vector2(200, 0)
+repeat_times = 52
+
+[node name="Sprite2D" type="Sprite2D" parent="ParallaxBackground/Parallax2D5" unique_id=1223865053]
 texture = ExtResource("2_22jbo")
 
 [node name="Parallax2D4" type="Parallax2D" parent="ParallaxBackground" unique_id=369438892]
@@ -112,13 +119,12 @@ zoom = Vector2(3.5, 3.5)
 drag_left_margin = 0.1
 drag_right_margin = 0.1
 script = ExtResource("4_wtpou")
-vertical_offset = -60.0
 
 [node name="FallDeathArea" type="Area2D" parent="." unique_id=1913693973]
 collision_mask = 2
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="FallDeathArea" unique_id=643289271]
-position = Vector2(-70.5, 715)
+position = Vector2(-22, 409.25)
 shape = SubResource("RectangleShape2D_rrtyo")
 
 [node name="CollisionShape2D2" type="CollisionShape2D" parent="FallDeathArea" unique_id=617637647]
@@ -126,7 +132,7 @@ position = Vector2(-67.5, 4362.5)
 shape = SubResource("RectangleShape2D_wtpou")
 
 [node name="Rail" parent="." unique_id=795965899 instance=ExtResource("7_3qix0")]
-position = Vector2(-2173, -699)
+position = Vector2(-3255, -642)
 
 [node name="Line2D" parent="Rail" index="2" unique_id=404494628]
 texture_repeat = 2
@@ -155,7 +161,9 @@ stream = ExtResource("9_kmo6j")
 autoplay = true
 
 [node name="Transitions" parent="." unique_id=938060551 instance=ExtResource("5_kmo6j")]
-visible = false
+
+[node name="AiPlayer" parent="." unique_id=342837933 instance=ExtResource("15_22jbo")]
+position = Vector2(31, -33)
 
 [editable path="Rail"]
 [editable path="Rail2"]

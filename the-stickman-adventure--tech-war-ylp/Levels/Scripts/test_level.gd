@@ -20,9 +20,9 @@ func _ready() -> void:
 	var names := []
 	for p in $Camera.get_property_list():
 		names.append(p.name)
-		print("Camera properties:", names)
-		print("=== CAMERA DEBUG END ===")
-		print("Selected characters:", GameState.selected_characters)
+	print("Camera properties:", names)
+	print("=== CAMERA DEBUG END ===")
+	print("Selected characters:", GameState.selected_characters)
 
 	var mode = GameState.game_mode
 	var chars = GameState.selected_characters
@@ -33,6 +33,10 @@ func _ready() -> void:
 		
 	if mode == "single":
 		var p1 = spawn_single(chars[0])
+		
+		for ai in get_tree().get_nodes_in_group("ai"):
+			ai.player = p1
+			
 		setup_single_player(p1)
 	else:
 		var players = spawn_multi(chars)
@@ -50,6 +54,9 @@ func _ready() -> void:
 func spawn_single(character):
 	var player_scene = load(character["scene"])
 	var player = player_scene.instantiate()
+	
+	player.add_to_group("player")
+	
 	add_child(player)
 	return player
 
@@ -60,7 +67,10 @@ func spawn_multi(characters):
 
 	var player1 = p1_scene.instantiate()
 	var player2 = p2_scene.instantiate()
-
+	
+	player1.add_to_group("player")
+	player2.add_to_group("player")
+	
 	add_child(player1)
 	add_child(player2)
 
@@ -70,17 +80,20 @@ func spawn_multi(characters):
 # ---------------------------------------------------------
 # SINGLE PLAYER SETUP
 # ---------------------------------------------------------
-func setup_single_player(player1):
-	# Respawn position
+func setup_single_player(player1) -> void:
 	player1.global_position = P1_RESPAWN
 
-	# Camera mode
+	if "respawn_position" in player1:
+		player1.respawn_position = P1_RESPAWN
+
+	var death_area: Area2D = $FallDeathArea
+	var callback := Callable(player1, "_on_fall_death_area_body_entered")
+	if not death_area.body_entered.is_connected(callback):
+		death_area.body_entered.connect(callback)
+
 	cam.player = player1
 	cam.player2 = null
 	call_deferred("_deferred_make_current")
-	# Hide player 2 if it exists
-	if has_node("Max"):
-		$Max.visible = false
 
 
 # ---------------------------------------------------------

@@ -47,17 +47,43 @@ var on_rail: bool = false
 # Facing direction
 var facing_dir: int = 1
 
+# AI personality
+
+var random_move_timer := 0.0
+var random_move_dir := 0.0
+
+var double_jump_used := false
+
+var teabag_timer := 0.0
+var teabag_active := false
+
+
+var air_jumps_used: int = 0
+
+@export var random_move_chance: float = 0.20
+@export var random_jump_chance: float = 0.04
+@export var random_double_jump_chance: float = 0.10
+@export var random_teabag_chance: float = 0.002
+
+@export var max_air_jumps: int = 1
+
 @onready var anim: AnimatedSprite2D = $AnimatedSprite2D
 
 
 func _ready() -> void:
+	add_to_group("ai")
+	
 	if spawn_position == Vector2.ZERO:
 		spawn_position = global_position
 	player = get_tree().root.find_child("Player", true, false)
+	
+	print(get_tree().get_nodes_in_group("player"))
 
 
 func _physics_process(delta: float) -> void:
-	respawn_cooldown = max(respawn_cooldown - delta, 0.0)
+	_find_player()
+	
+	respawn_cooldown = maxf(respawn_cooldown - delta, 0.0)
 
 	if on_rail:
 		move_and_slide()
@@ -68,58 +94,153 @@ func _physics_process(delta: float) -> void:
 		move_and_slide()
 		return
 
-	var move_dir := 0.0
+	var move_dir: float = 0.0
+
 	if player != null:
-		var dist := abs(player.global_position.x - global_position.x)
+		var dist: float = absf(
+			player.global_position.x - global_position.x
+		)
 
 		if dist > follow_run_distance:
 			want_run = true
-			move_dir = sign(player.global_position.x - global_position.x)
+			move_dir = signf(
+				player.global_position.x - global_position.x
+			)
+
 		elif dist > follow_min_distance:
 			want_run = false
-			move_dir = sign(player.global_position.x - global_position.x)
+			move_dir = signf(
+				player.global_position.x - global_position.x
+			)
+
 		else:
 			want_run = false
 			move_dir = 0.0
+
 	else:
 		want_run = false
 		move_dir = 0.0
 
-	input_dir = move_toward(input_dir, move_dir, delta * follow_smoothness)
+	random_move_timer -= delta
 
-	var gap_ahead := is_on_floor() and input_dir != 0.0 and not _has_ground_in_front(input_dir)
-	apply_input(input_dir, want_run, gap_ahead, false)
+	if random_move_timer <= 0.0:
+		random_move_timer = randf_range(1.0, 3.0)
+
+		if randf() < random_move_chance:
+			random_move_dir = randf_range(-1.0, 1.0)
+		else:
+			random_move_dir = 0.0
+
+	move_dir = clampf(
+		move_dir + random_move_dir * 0.5,
+		-1.0,
+		1.0
+	)
+
+	input_dir = move_toward(
+		input_dir,
+		move_dir,
+		delta * follow_smoothness
+	)
+
+	# random teabag
+	if is_on_floor():
+		if not teabag_active:
+			if randf() < random_teabag_chance:
+				teabag_active = true
+				teabag_timer = randf_range(0.3, 1.5)
+
+		else:
+			teabag_timer -= delta
+
+			if teabag_timer <= 0.0:
+				teabag_active = false
+
+	var gap_ahead: bool = (
+		is_on_floor()
+		and input_dir != 0.0
+		and not _has_ground_in_front(input_dir)
+	)
+
+	apply_input(
+		input_dir,
+		want_run,
+		gap_ahead,
+		false
+	)
+
+	# random jump
+	if is_on_floor():
+		if randf() < random_jump_chance * delta:
+			want_jump_pressed = true
+
+	# random double jump
+	if (
+		not is_on_floor()
+		and air_jumps_used < max_air_jumps
+		and randf() < random_double_jump_chance * delta
+	):
+		want_jump_pressed = true
 
 	_update_jump_timers(delta)
+
 	_apply_horizontal_motion(delta)
+
 	_apply_air_gravity(delta)
+
 	move_and_slide()
 
 	if input_dir != 0.0:
-		facing_dir = int(sign(input_dir))
+		facing_dir = int(signf(input_dir))
 
 	want_jump_pressed = false
+
 	_update_animation()
 
-	if respawn_cooldown == 0.0 and global_position.y > spawn_position.y + 800.0:
+	if (
+		respawn_cooldown <= 0.0
+		and global_position.y > spawn_position.y + 800.0
+	):
 		respawn()
 
 
 func _update_jump_timers(delta: float) -> void:
-	coyote_timer = max(coyote_timer - delta, 0.0)
-	jump_buffer_timer = max(jump_buffer_timer - delta, 0.0)
+	coyote_timer = maxf(
+		coyote_timer - delta,
+		0.0
+	)
+
+	jump_buffer_timer = maxf(
+		jump_buffer_timer - delta,
+		0.0
+	)
 
 	if want_jump_pressed:
 		jump_buffer_timer = jump_buffer_time
 
 	if is_on_floor():
 		coyote_timer = coyote_time
+		air_jumps_used = 0
 
-	if coyote_timer > 0.0 and jump_buffer_timer > 0.0:
+	if (
+		coyote_timer > 0.0
+		and jump_buffer_timer > 0.0
+	):
 		velocity.y = -jump_force
+
 		jump_buffer_timer = 0.0
 		coyote_timer = 0.0
 
+	elif (
+		want_jump_pressed
+		and not is_on_floor()
+		and air_jumps_used < max_air_jumps
+	):
+		velocity.y = -(jump_force * 0.9)
+
+		air_jumps_used += 1
+
+		jump_buffer_timer = 0.0
 
 func _apply_horizontal_motion(delta: float) -> void:
 	var target_speed := (run_speed if want_run else move_speed) * input_dir
@@ -154,15 +275,21 @@ func set_on_rail(state: bool) -> void:
 
 
 func _update_animation() -> void:
-	if not anim:
+	if anim == null:
 		return
 
 	if not is_on_floor():
 		anim.play("single_jump")
-	elif abs(velocity.x) < 1.0:
+
+	elif teabag_active:
+		anim.play("crouch")
+
+	elif absf(velocity.x) < 1.0:
 		anim.play("idle")
-	elif abs(velocity.x) > move_speed * 0.9:
+
+	elif absf(velocity.x) > move_speed * 0.9:
 		anim.play("run")
+
 	else:
 		anim.play("walk")
 
@@ -194,6 +321,17 @@ func respawn() -> void:
 	velocity = Vector2.ZERO
 	respawn_cooldown = 1.0
 
+func _find_player() -> void:
+	if is_instance_valid(player):
+		return
 
+	player = get_tree().get_first_node_in_group(
+		"player"
+	) as CharacterBody2D
+	
+	if player:
+		print("PLAYER FOUND")
+	else:
+		print("NO PLAYER")
 func _on_animated_sprite_2d_animation_finished() -> void:
 	pass # Replace with function body.
