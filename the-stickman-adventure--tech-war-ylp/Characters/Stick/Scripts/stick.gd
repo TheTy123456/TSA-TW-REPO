@@ -8,6 +8,13 @@ extends CharacterBody2D
 @onready var wall_check_right: RayCast2D = $WallCheckRight
 @onready var ledge_shape_cast: ShapeCast2D = $LedgeShapeCast
 @onready var head_clearance_shape_cast: ShapeCast2D = $HeadClearanceShapeCast
+@onready var voice_player: AudioStreamPlayer = $VoicePlayer
+@export var music_node_path: NodePath = NodePath("../AudioStreamPlayer")
+var music: AudioStreamPlayer
+
+@export var intro_voice: AudioStream
+@export var random_voices: Array[AudioStream]
+
 
 var _gpu_mat: ParticleProcessMaterial = null
 
@@ -60,7 +67,6 @@ var _gpu_mat: ParticleProcessMaterial = null
 @export var rail_height_offset: float = -20.0
 
 # Music
-@export var music_node_path: NodePath = NodePath("../Music")
 @export var music_fade_duration: float = 0.5
 
 # Wall movement
@@ -113,6 +119,7 @@ enum State {
 	Jump,
 	Fall,
 	Crouch,
+	Crawl,
 	Land,
 	DoubleJump,
 	WalkStart,
@@ -181,12 +188,31 @@ func _ready() -> void:
 		animated_sprite_2d.sprite_frames.set_animation_speed(&"turn", 12.0)
 		animated_sprite_2d.sprite_frames.set_animation_speed(&"single_jump", 6.0)
 		animated_sprite_2d.sprite_frames.set_animation_speed(&"double_jump", 10.0)
-
+		
+	music = get_node_or_null(music_node_path) as AudioStreamPlayer
+	if music == null:
+		push_error("Music node not found: " + str(music_node_path))
+		
 	was_on_floor = is_on_floor()
 	update_hitbox()
 	start_respawn_lock(spawn_lock_duration)
+	
 
+	await get_tree().create_timer(0.5).timeout
 
+	print("PLAYING INTRO VOICE")
+
+	await play_voice(intro_voice)
+
+	print("STARTING RANDOM BARKS")
+
+	start_random_barks.call_deferred()
+	
+	if music == null:
+		push_error("Could not find level music!")
+	else:
+		print("Found music:", music.name)
+		
 func _physics_process(delta: float) -> void:
 	# Rail.gd controls the rider's global position and rotation.
 	if is_on_rail:
@@ -223,7 +249,13 @@ func _physics_process(delta: float) -> void:
 		_update_ledge_mantle(delta)
 		_finalize_frame()
 		return
-
+	
+	if crouch_reversing:
+		velocity.x = 0.0
+		move_and_slide()
+		_finalize_frame()
+		return
+		
 	# W/S are wall-climb controls while touching a wall.
 	# Do not let W trigger a normal jump or double jump there.
 	if is_on_wall:
@@ -275,7 +307,10 @@ func _physics_process(delta: float) -> void:
 
 	if is_on_floor():
 		if is_crouching:
-			current_state = State.Crouch
+			if input_dir != 0.0:
+				current_state = State.Crawl
+			else:
+				current_state = State.Crouch
 			velocity.x = move_toward(
 				previous_velocity_x,
 				input_dir * crouch_speed,
@@ -291,10 +326,13 @@ func _physics_process(delta: float) -> void:
 		elif input_dir != 0.0:
 			if current_state == State.Idle:
 				current_state = State.WalkStart
-			elif (
-				current_state != State.WalkStart
-				and current_state != State.Walk
-			):
+			elif current_state == State.WalkEnd:
+				current_state = State.WalkStart
+			elif current_state not in [
+				State.WalkStart,
+				State.Walk,
+				State.Run
+			]:
 				current_state = State.Walk
 			velocity.x = move_toward(
 				previous_velocity_x,
@@ -357,7 +395,7 @@ func _update_input_state(delta: float) -> void:
 	is_crouching = crouch_input and is_on_floor()
 
 	if was_crouching and not is_crouching:
-		crouch_release_requested = false
+		crouch_release_requested = true
 
 	jump_buffer_timer = maxf(jump_buffer_timer - delta, 0.0)
 
@@ -621,23 +659,35 @@ func update_hitbox() -> void:
 
 
 func update_animation() -> void:
-	if animated_sprite_2d == null:
-		return
-	if (
-	current_state == State.WalkStart
-	or current_state == State.WalkEnd
-	):
-		if animated_sprite_2d.animation == &"start walk" \
-		or animated_sprite_2d.animation == &"end walk":
-			if animated_sprite_2d.is_playing():
+	print(
+	"STATE:",
+	current_state,
+	" ANIM:",
+	animated_sprite_2d.animation
+)
+	if current_state == State.WalkStart:
+		if (
+			animated_sprite_2d.animation == &"start walk"
+			and animated_sprite_2d.is_playing()
+			):
+				return
+
+	if current_state == State.WalkEnd:
+		if (
+			animated_sprite_2d.animation == &"end walk"
+			and animated_sprite_2d.is_playing()
+			):
 				return
 		
 	if crouch_reversing:
 		return
 
 	if crouch_release_requested:
+		print("START CROUCH REVERSE")
+		
 		crouch_release_requested = false
 		crouch_reversing = true
+		
 		animated_sprite_2d.play_backwards(&"crouch")
 		_update_facing()
 		return
@@ -676,6 +726,8 @@ func update_animation() -> void:
 			animation_name = &"fall"
 		State.Crouch:
 			animation_name = &"crouch"
+		State.Crawl:
+			animation_name = &"crawl"
 		State.Land:
 			animation_name = &"land"
 		State.WalkStart:
@@ -1026,6 +1078,7 @@ func _handle_wall_climb(delta: float) -> void:
 
 
 func _on_animated_sprite_2d_animation_finished() -> void:
+	print("ANIMATION FINISHED:", animated_sprite_2d.animation)
 	if (
 		animated_sprite_2d.animation == &"idle 2"
 		or animated_sprite_2d.animation == &"idle 3"
@@ -1035,15 +1088,22 @@ func _on_animated_sprite_2d_animation_finished() -> void:
 		return
 
 	if crouch_reversing:
+		print("CROUCH REVERSE FINISHED")
+		
 		crouch_reversing = false
+		current_state = State.Idle
+		
 		update_animation()
 		return
 
 	match animated_sprite_2d.animation:
 		&"start walk":
+			print("START WALK FINISHED")
 			current_state = State.Walk
+			
 
 		&"end walk":
+			print("END WALK FINISHED")
 			current_state = State.Idle
 
 		&"skid":
@@ -1117,8 +1177,8 @@ func _on_fall_death_area_body_entered(body: Node2D) -> void:
 
 	camera_should_follow = false
 
-	var music := get_node_or_null(music_node_path) as AudioStreamPlayer
-	if music != null:
+	var music_player := get_node_or_null(music_node_path) as AudioStreamPlayer
+	if music_player != null:
 		var music_tween: Tween = create_tween()
 		music_tween.tween_property(
 			music,
@@ -1163,10 +1223,65 @@ func _on_fall_death_area_body_entered(body: Node2D) -> void:
 
 
 func _on_music_finished() -> void:
-	var music := get_node_or_null(music_node_path) as AudioStreamPlayer
-	if music != null:
-		music.play()
+	var music_player := get_node_or_null(music_node_path) as AudioStreamPlayer
+	if music_player != null:
+		music_player.play()
 
 
 func _on_fall_death_area_body_exited(_body: Node2D) -> void:
 	pass
+	
+
+func play_voice(clip: AudioStream) -> void:
+	if clip == null:
+		return
+
+	if music == null:
+		voice_player.stream = clip
+		voice_player.play()
+
+		await voice_player.finished
+		return
+
+	var original_volume: float = music.volume_db
+
+	var duck := create_tween()
+
+	duck.tween_property(
+		music,
+		"volume_db",
+		original_volume - 12.0,
+		0.15
+	)
+	print("PLAY VOICE CALLED")
+	if clip == null:
+		print("VOICE CLIP IS NULL")
+		return
+	print("VOICE CLIP:", clip.resource_path)
+	voice_player.stream = clip
+	voice_player.play()
+	await voice_player.finished
+	print("VOICE FINISHED")
+	var restore := create_tween()
+	restore.tween_property(
+		music,
+		"volume_db",
+		original_volume,
+		0.25
+	)
+	
+func start_random_barks() -> void:
+	while true:
+		var wait_time := randf_range(20.0, 60.0)
+
+		await get_tree().create_timer(wait_time).timeout
+
+		if voice_player.playing:
+			continue
+
+		if random_voices.is_empty():
+			continue
+
+		var clip: AudioStream = random_voices.pick_random()
+
+		await play_voice(clip)

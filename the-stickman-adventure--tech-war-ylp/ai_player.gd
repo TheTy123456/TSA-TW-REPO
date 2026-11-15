@@ -67,7 +67,7 @@ var air_jumps_used: int = 0
 
 @export var max_air_jumps: int = 1
 
-@onready var anim: AnimatedSprite2D = $AnimatedSprite2D
+@onready var anim: AnimatedSprite2D = $AnimatedSprite2D2
 
 
 func _ready() -> void:
@@ -333,5 +333,6 @@ func _find_player() -> void:
 		print("PLAYER FOUND")
 	else:
 		print("NO PLAYER")
-func _on_animated_sprite_2d_animation_finished() -> void:
+		
+func _on_animated_sprite_2d_2_animation_finished() -> void:
 	pass # Replace with function body.

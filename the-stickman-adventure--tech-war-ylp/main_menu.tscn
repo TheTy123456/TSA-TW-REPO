@@ -19,8 +19,8 @@
 [ext_resource type="Texture2D" uid="uid://u431x42xa6jn" path="res://pixil-frame-2.png" id="12_w44g7"]
 [ext_resource type="Texture2D" uid="uid://bb827yymlhvox" path="res://costume1 (1).png" id="14_w44g7"]
 [ext_resource type="Script" uid="uid://gbb3v3041qht" path="res://texture_rect.gd" id="15_8u0te"]
-[ext_resource type="AudioStream" uid="uid://c7kv00wn2f8j3" path="res://16 Super Sonic Racing (Instrumental).mp3" id="15_cm266"]
 [ext_resource type="PackedScene" uid="uid://d1aqq35qid7gv" path="res://UI Mechanics/Transitions/Scenes/circle_transition.tscn" id="16_g8g3n"]
+[ext_resource type="AudioStream" uid="uid://qyvf08kcs5ig" path="res://Tyre Out.mp3" id="20_e5qqf"]
 
 [sub_resource type="CapsuleShape2D" id="CapsuleShape2D_rrtyo"]
 radius = 24.0
@@ -208,7 +208,7 @@ texture = ExtResource("4_qe12f")
 script = ExtResource("15_8u0te")
 
 [node name="AudioStreamPlayer" type="AudioStreamPlayer" parent="." unique_id=1322060004]
-stream = ExtResource("15_cm266")
+stream = ExtResource("20_e5qqf")
 autoplay = true
 
 [node name="Transitions" parent="." unique_id=1135095852 instance=ExtResource("16_g8g3n")]

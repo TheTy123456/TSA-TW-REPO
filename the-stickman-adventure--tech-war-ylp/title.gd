@@ -18,6 +18,9 @@ var logo_scale := Vector2(3.0, 3.0)
 
 var beat_enabled := false
 
+var can_start := false
+var starting_game := false
+
 var run_bop := [
 	0,
 	-10,
@@ -165,11 +168,17 @@ func show_title():
 	
 	music.play()
 	label.show()
+	
+	label.text = "PRESS ANY BUTTON"
+	
 	logo_bumping = true
 	
 	base_logo_scale = title.scale
 	logo_scale = title.scale
 	beat_enabled = true
+	
+	can_start = true
+	
 	start_beat()
 	
 func start_logo_bump():
@@ -211,3 +220,28 @@ func _on_title_music_finished():
 	# --------------------------------
 	
 	bg_music.play()
+
+func _unhandled_input(event):
+	if !can_start or starting_game:
+		return
+
+	if event.is_pressed():
+		start_game()
+
+
+func start_game():
+	starting_game = true
+	can_start = false
+
+	beat_enabled = false
+	logo_bumping = false
+
+	if has_node("Transitions"):
+		$Transitions.play_circle_fade_in()
+
+		# Match your transition length
+		await get_tree().create_timer(1.0).timeout
+
+	get_tree().change_scene_to_file(
+		"res://main_menu.tscn"
+	)

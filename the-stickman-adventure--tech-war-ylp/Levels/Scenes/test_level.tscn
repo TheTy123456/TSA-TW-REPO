@@ -12,9 +12,11 @@
 [ext_resource type="PackedScene" uid="uid://cws1ithn2s6tq" path="res://UI Mechanics/Text/text.tscn" id="6_agw3v"]
 [ext_resource type="PackedScene" uid="uid://dj645l5bmvsre" path="res://Mechanics/Rails/Scenes/rail.tscn" id="7_3qix0"]
 [ext_resource type="PackedScene" uid="uid://ccjbpwt4m3p1g" path="res://Mechanics/Rails/Scenes/rail_2_test_level.tscn" id="8_wtpou"]
-[ext_resource type="AudioStream" uid="uid://cw2n4vacw2fnf" path="res://Main Audio/Level Music/8-1-27.mp3" id="9_kmo6j"]
 [ext_resource type="Texture2D" uid="uid://bdhotek3kcqn1" path="res://pixil-frame-2 (2).png" id="10_ynamt"]
+[ext_resource type="AudioStream" uid="uid://b0h61dpc1tp70" path="res://TechTop Trees.mp3" id="13_22jbo"]
 [ext_resource type="PackedScene" uid="uid://cf075045jgu74" path="res://ai_player.tscn" id="15_22jbo"]
+[ext_resource type="Script" uid="uid://kgxmhqx3b5yi" path="res://Levels/Scenes/captions.gd" id="16_48mh7"]
+[ext_resource type="FontFile" uid="uid://c48jkx3ffe0m1" path="res://Fonts/Silkscreen-Regular.ttf" id="17_a2kh8"]
 
 [sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_1c2mv"]
 texture = ExtResource("2_agw3v")
@@ -157,13 +159,27 @@ polygon = PackedVector2Array(319, -672, 647, -839, 1699, -579, 2627, -700, 2767,
 position = Vector2(213, -124)
 
 [node name="AudioStreamPlayer" type="AudioStreamPlayer" parent="." unique_id=1047654280]
-stream = ExtResource("9_kmo6j")
+stream = ExtResource("13_22jbo")
 autoplay = true
 
 [node name="Transitions" parent="." unique_id=938060551 instance=ExtResource("5_kmo6j")]
+visible = false
 
 [node name="AiPlayer" parent="." unique_id=342837933 instance=ExtResource("15_22jbo")]
 position = Vector2(31, -33)
+
+[node name="Captions" type="CanvasLayer" parent="." unique_id=1536801137]
+script = ExtResource("16_48mh7")
+
+[node name="Panel" type="Panel" parent="Captions" unique_id=1507238480]
+offset_right = 40.0
+offset_bottom = 40.0
+
+[node name="Label" type="Label" parent="Captions/Panel" unique_id=1692340943]
+layout_mode = 0
+offset_right = 40.0
+offset_bottom = 23.0
+theme_override_fonts/font = ExtResource("17_a2kh8")
 
 [editable path="Rail"]
 [editable path="Rail2"]

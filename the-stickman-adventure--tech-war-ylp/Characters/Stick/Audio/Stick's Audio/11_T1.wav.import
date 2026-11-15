@@ -1,0 +1,24 @@
+[remap]
+
+importer="wav"
+type="AudioStreamWAV"
+uid="uid://dd4wf3r6x5pca"
+path="res://.godot/imported/11_T1.wav-6fa3e3e6284ac1b882dc99925f395041.sample"
+
+[deps]
+
+source_file="res://Characters/Stick/Audio/Stick's Audio/11_T1.wav"
+dest_files=["res://.godot/imported/11_T1.wav-6fa3e3e6284ac1b882dc99925f395041.sample"]
+
+[params]
+
+force/8_bit=false
+force/mono=false
+force/max_rate=false
+force/max_rate_hz=44100
+edit/trim=false
+edit/normalize=false
+edit/loop_mode=0
+edit/loop_begin=0
+edit/loop_end=-1
+compress/mode=2
